@@ -1,0 +1,22 @@
+{% extends "base/base.html" %}
+{% block title %}Mitarbeiter bearbeiten – PV-Protokoll SaaS{% endblock %}
+{% block content %}
+<div class="container py-5" style="background: #fff; border-radius: 12px; max-width: 700px;">
+  <h2 class="fw-bold mb-4">Mitarbeiter {{ form.instance.pk|yesno:'bearbeiten,anlegen' }}</h2>
+  <form method="post" enctype="multipart/form-data" class="mb-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+        {% for error in field.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Speichern</button>
+    <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-secondary ms-2">Abbrechen</a>
+  </form>
+</div>
+{% endblock %} 

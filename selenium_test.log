@@ -1,0 +1,130 @@
+[08:38:15] INFO: === STARTE ERWEITERTEN SELENIUM-TEST ===
+[08:38:15] INFO: Startseite geladen: Anmelden - PV Protokoll System
+[08:38:15] INFO: Login-Seite geladen: Anmelden - PV Protokoll System
+[08:38:15] SUCCESS: Login-Formular gefunden
+[08:38:16] INFO: Login-Daten eingegeben, warte auf Weiterleitung...
+[08:38:18] INFO: Aktuelle URL: http://192.168.65.56:8000/accounts/dashboard/
+[08:38:18] INFO: Aktueller Titel: Dashboard – PV-Protokoll SaaS
+[08:38:18] SUCCESS: Dashboard gefunden: Guten Morgen, Test
+[08:38:18] SUCCESS: Login erfolgreich!
+[08:38:18] INFO: === TESTE KUNDEN-ANLAGE ===
+[08:38:18] INFO: Kundenliste geladen
+[08:38:18] INFO: Neuer Kunde-Button geklickt
+[08:38:18] INFO: Kunden-Formular geladen
+[08:38:18] WARNING: Kunden-Feld first_name nicht gefunden
+[08:38:18] WARNING: Kunden-Feld last_name nicht gefunden
+[08:38:18] WARNING: Kunden-Feld email nicht gefunden
+[08:38:18] WARNING: Kunden-Feld phone nicht gefunden
+[08:38:18] WARNING: Kunden-Feld address nicht gefunden
+[08:38:18] WARNING: Kunden-Feld city nicht gefunden
+[08:38:18] WARNING: Kunden-Feld postal_code nicht gefunden
+[08:38:18] INFO: Kunden-Formular abgeschickt
+[08:38:20] SUCCESS: Kunde erfolgreich angelegt
+[08:38:20] INFO: === TESTE ANLAGEN-ANLAGE ===
+[08:38:20] INFO: Anlagenliste geladen
+[08:38:20] WARNING: Fehler beim Anlegen der Anlage: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//a[contains(@href, 'installations/new') or contains(text(), 'Neue Anlage')]"}
+  (Session info: chrome=138.0.7204.101); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception
+Stacktrace:
+0   chromedriver                        0x0000000100f94e6c cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000100f8cd74 cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x0000000100ade3ec cxxbridge1$string$len + 90648
+3   chromedriver                        0x0000000100b25544 cxxbridge1$string$len + 381808
+4   chromedriver                        0x0000000100b66934 cxxbridge1$string$len + 649056
+5   chromedriver                        0x0000000100b19834 cxxbridge1$string$len + 333408
+6   chromedriver                        0x0000000100f57f88 cxxbridge1$str$ptr + 2473268
+7   chromedriver                        0x0000000100f5b1f4 cxxbridge1$str$ptr + 2486176
+8   chromedriver                        0x0000000100f399d0 cxxbridge1$str$ptr + 2348924
+9   chromedriver                        0x0000000100f5bab0 cxxbridge1$str$ptr + 2488412
+10  chromedriver                        0x0000000100f2aa60 cxxbridge1$str$ptr + 2287628
+11  chromedriver                        0x0000000100f7b9a0 cxxbridge1$str$ptr + 2619212
+12  chromedriver                        0x0000000100f7bb2c cxxbridge1$str$ptr + 2619608
+13  chromedriver                        0x0000000100f8c9b0 cxxbridge1$str$ptr + 2688860
+14  libsystem_pthread.dylib             0x000000018d67b2e4 _pthread_start + 136
+15  libsystem_pthread.dylib             0x000000018d6760fc thread_start + 8
+
+[08:38:20] INFO: === TESTE PROTOKOLL-ANLAGE ===
+[08:38:20] INFO: Protokoll-Liste geladen
+[08:38:20] INFO: Neues Protokoll-Button geklickt
+[08:38:20] INFO: Protokoll-Formular geladen
+[08:38:20] INFO: Protokoll-Feld title ausgefüllt: Test-Protokoll
+[08:38:20] WARNING: Protokoll-Feld description nicht gefunden
+[08:38:20] INFO: Protokoll-Formular abgeschickt
+[08:38:22] SUCCESS: Protokoll erfolgreich angelegt
+[08:38:22] INFO: === TESTE MITARBEITER-EINLADUNG ===
+[08:38:22] INFO: Mitarbeiter-Liste geladen
+[08:38:22] INFO: Einladen-Button geklickt
+[08:38:22] INFO: Einladungs-Formular geladen
+[08:38:22] INFO: Einladungs-Feld email ausgefüllt: test.mitarbeiter@example.com
+[08:38:22] INFO: Rolle ausgewählt: employee
+[08:38:22] INFO: Einladungs-Formular abgeschickt
+[08:38:24] SUCCESS: Einladung erfolgreich erstellt
+[08:38:24] INFO: === TESTE PROTOKOLLVORLAGE-ANLAGE ===
+[08:38:24] INFO: Vorlagen-Liste geladen
+[08:38:24] INFO: Neue Vorlage-Button geklickt
+[08:38:24] INFO: Vorlagen-Formular geladen
+[08:38:24] INFO: Vorlagen-Feld name ausgefüllt: Selenium-Testvorlage
+[08:38:24] WARNING: Fehler beim Anlegen der Vorlage: Message: invalid element state
+  (Session info: chrome=138.0.7204.101)
+Stacktrace:
+0   chromedriver                        0x0000000100f94e6c cxxbridge1$str$ptr + 2722840
+1   chromedriver                        0x0000000100f8cd74 cxxbridge1$str$ptr + 2689824
+2   chromedriver                        0x0000000100ade260 cxxbridge1$string$len + 90252
+3   chromedriver                        0x0000000100b1d060 cxxbridge1$string$len + 347788
+4   chromedriver                        0x0000000100b1ade4 cxxbridge1$string$len + 338960
+5   chromedriver                        0x0000000100b66934 cxxbridge1$string$len + 649056
+6   chromedriver                        0x0000000100b19834 cxxbridge1$string$len + 333408
+7   chromedriver                        0x0000000100f57f88 cxxbridge1$str$ptr + 2473268
+8   chromedriver                        0x0000000100f5b1f4 cxxbridge1$str$ptr + 2486176
+9   chromedriver                        0x0000000100f399d0 cxxbridge1$str$ptr + 2348924
+10  chromedriver                        0x0000000100f5bab0 cxxbridge1$str$ptr + 2488412
+11  chromedriver                        0x0000000100f2aa60 cxxbridge1$str$ptr + 2287628
+12  chromedriver                        0x0000000100f7b9a0 cxxbridge1$str$ptr + 2619212
+13  chromedriver                        0x0000000100f7bb2c cxxbridge1$str$ptr + 2619608
+14  chromedriver                        0x0000000100f8c9b0 cxxbridge1$str$ptr + 2688860
+15  libsystem_pthread.dylib             0x000000018d67b2e4 _pthread_start + 136
+16  libsystem_pthread.dylib             0x000000018d6760fc thread_start + 8
+
+[08:38:35] ERROR: Kunde nach Anlage NICHT in der Liste gefunden!
+[08:38:45] ERROR: Anlage nach Anlage NICHT in der Liste gefunden!
+[08:38:55] ERROR: Protokoll nach Anlage NICHT in der Liste gefunden!
+[08:39:05] ERROR: Mitarbeiter nach Einladung NICHT in der Liste gefunden!
+[08:39:05] INFO: === TESTE ALLE NAVIGATIONS-BEREICHE ===
+[08:39:05] INFO: Navigation zu http://192.168.65.56:8000/installations/
+[08:39:05] WARNING: Titel unerwartet: Anlagenverwaltung Dashboard
+[08:39:16] ERROR: Element nicht gefunden: //h1[contains(text(), 'Anlagenverwaltung')]
+[08:39:16] WARNING: Anlagen-Dashboard-Navigation hat Probleme
+[08:39:16] INFO: Navigation zu http://192.168.65.56:8000/installations/customers/
+[08:39:16] SUCCESS: Titel korrekt: Kunden – PV-Protokoll SaaS
+[08:39:16] SUCCESS: Element gefunden: //h2[contains(text(), 'Kunden')]
+[08:39:16] SUCCESS: Kunden-Navigation funktioniert
+[08:39:16] INFO: Navigation zu http://192.168.65.56:8000/installations/installations/
+[08:39:16] WARNING: Titel unerwartet: Anlagen – PV-Protokoll SaaS
+[08:39:16] SUCCESS: Element gefunden: //h2[contains(text(), 'Anlagen')]
+[08:39:16] SUCCESS: PV-Anlagen-Navigation funktioniert
+[08:39:16] INFO: Navigation zu http://192.168.65.56:8000/protocols/protocols/
+[08:39:16] SUCCESS: Titel korrekt: Protokolle – PV-Protokoll SaaS
+[08:39:26] ERROR: Element nicht gefunden: //h2[contains(text(), 'Protokoll')]
+[08:39:26] WARNING: Protokolle-Navigation hat Probleme
+[08:39:26] INFO: Navigation zu http://192.168.65.56:8000/protocols/templates/
+[08:39:26] WARNING: Titel unerwartet: Protokollvorlagen – PV-Protokoll SaaS
+[08:39:36] ERROR: Element nicht gefunden: //h2[contains(text(), 'Protokollvorlagen')]
+[08:39:36] WARNING: Vorlagen-Navigation hat Probleme
+[08:39:36] INFO: Navigation zu http://192.168.65.56:8000/accounts/users/
+[08:39:36] SUCCESS: Titel korrekt: Mitarbeiter verwalten – PV-Protokoll SaaS
+[08:39:36] SUCCESS: Element gefunden: //h2[contains(text(), 'Mitarbeiter')]
+[08:39:36] SUCCESS: Mitarbeiter-Navigation funktioniert
+[08:39:36] INFO: Navigation zu http://192.168.65.56:8000/accounts/profile/
+[08:39:36] SUCCESS: Titel korrekt: Mein Profil – PV-Protokoll SaaS
+[08:39:36] SUCCESS: Element gefunden: //h2[contains(text(), 'Profil')]
+[08:39:36] SUCCESS: Profil-Navigation funktioniert
+[08:39:36] INFO: === TESTE ANLAGEN-DETAILANSICHT & CRM-ZEITVERLAUF ===
+[08:39:36] INFO: Anlagenliste geladen
+[08:39:47] WARNING: Keine Anlagen vorhanden - Test übersprungen
+[08:39:47] INFO: === TESTE NOTIZ- UND WARTUNGSANLAGE ===
+[08:39:47] WARNING: Nicht auf Anlagen-Detailseite - Test übersprungen
+[08:39:47] INFO: === TESTE TITELBILD-UPLOAD ===
+[08:39:47] WARNING: Nicht auf Anlagen-Detailseite - Test übersprungen
+[08:39:47] INFO: === TESTE KARTENANSICHT ===
+[08:39:47] WARNING: Nicht auf Anlagen-Detailseite - Test übersprungen
+[08:39:47] SUCCESS: === ALLE ERWEITERTEN TESTS ABGESCHLOSSEN ===
+[08:39:47] INFO: Test abgeschlossen.

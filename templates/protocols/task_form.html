@@ -1,0 +1,385 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.pk %}Aufgabe bearbeiten{% else %}Neue Aufgabe erstellen{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section h5 {
+        color: #495057;
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .tag-input {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .tag-input:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9ff;
+    }
+    
+    .tag-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .tag-badge {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .tag-remove {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        cursor: pointer;
+    }
+    
+    .priority-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    
+    .priority-low { background-color: #28a745; }
+    .priority-medium { background-color: #ffc107; }
+    .priority-high { background-color: #fd7e14; }
+    .priority-urgent { background-color: #dc3545; }
+    
+    .status-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    
+    .status-todo { background-color: #6c757d; }
+    .status-in_progress { background-color: #0d6efd; }
+    .status-review { background-color: #ffc107; }
+    .status-completed { background-color: #198754; }
+    .status-cancelled { background-color: #dc3545; }
+    .status-on_hold { background-color: #0dcaf0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-edit text-primary me-2"></i>
+                {% if form.instance.pk %}
+                    Aufgabe bearbeiten
+                {% else %}
+                    Neue Aufgabe erstellen
+                {% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if form.instance.pk %}
+                    Bearbeiten Sie die Details der Aufgabe
+                {% else %}
+                    Erstellen Sie eine neue Aufgabe mit allen Details
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'protocols:task_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Zurück zur Übersicht
+            </a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div class="form-card">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Grundinformationen -->
+                <div class="form-section">
+                    <h5>
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        Grundinformationen
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-8">
+                            {{ form.title|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.installation|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            {{ form.description|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status und Priorität -->
+                <div class="form-section">
+                    <h5>
+                        <i class="fas fa-tasks text-primary me-2"></i>
+                        Status und Priorität
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                <span class="status-indicator status-{{ form.status.value|default:'todo' }}"></span>
+                                Status
+                            </label>
+                            {{ form.status }}
+                            <div class="help-text">
+                                Wählen Sie den aktuellen Status der Aufgabe
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.priority.id_for_label }}" class="form-label">
+                                <span class="priority-indicator priority-{{ form.priority.value|default:'medium' }}"></span>
+                                Priorität
+                            </label>
+                            {{ form.priority }}
+                            <div class="help-text">
+                                Bestimmen Sie die Dringlichkeit der Aufgabe
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zeitplanung -->
+                <div class="form-section">
+                    <h5>
+                        <i class="fas fa-clock text-primary me-2"></i>
+                        Zeitplanung
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.due_date|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.estimated_hours|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.actual_hours|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zuweisungen -->
+                <div class="form-section">
+                    <h5>
+                        <i class="fas fa-users text-primary me-2"></i>
+                        Zuweisungen
+                    </h5>
+                    <div class="row">
+                        <div class="col-12">
+                            {{ form.assigned_users|as_crispy_field }}
+                            <div class="help-text">
+                                Wählen Sie die Mitarbeiter aus, die an dieser Aufgabe arbeiten sollen
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="form-section">
+                    <h5>
+                        <i class="fas fa-tags text-primary me-2"></i>
+                        Tags
+                    </h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="{{ form.tags.id_for_label }}" class="form-label">Tags</label>
+                            {{ form.tags }}
+                            <div class="help-text">
+                                Geben Sie komma-getrennte Tags ein (z.B. "Wartung, Dringend, Sommer")
+                            </div>
+                            <div class="tag-preview" id="tagPreview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aktionen -->
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-4 border-top">
+                    <div>
+                        <a href="{% url 'protocols:task_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Abbrechen
+                        </a>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            {% if form.instance.pk %}
+                                Änderungen speichern
+                            {% else %}
+                                Aufgabe erstellen
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tag-Vorschau
+    const tagInput = document.getElementById('{{ form.tags.id_for_label }}');
+    const tagPreview = document.getElementById('tagPreview');
+    
+    function updateTagPreview() {
+        const tags = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+        tagPreview.innerHTML = '';
+        
+        tags.forEach(tag => {
+            const badge = document.createElement('div');
+            badge.className = 'tag-badge';
+            badge.innerHTML = `
+                ${tag}
+                <button type="button" class="tag-remove" onclick="removeTag('${tag}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            tagPreview.appendChild(badge);
+        });
+    }
+    
+    window.removeTag = function(tagToRemove) {
+        const tags = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== tagToRemove);
+        tagInput.value = tags.join(', ');
+        updateTagPreview();
+    };
+    
+    tagInput.addEventListener('input', updateTagPreview);
+    updateTagPreview();
+    
+    // Status-Indikator aktualisieren
+    const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+    const statusIndicator = document.querySelector('.status-indicator');
+    
+    function updateStatusIndicator() {
+        const selectedStatus = statusSelect.value || 'todo';
+        statusIndicator.className = `status-indicator status-${selectedStatus}`;
+    }
+    
+    statusSelect.addEventListener('change', updateStatusIndicator);
+    updateStatusIndicator();
+    
+    // Prioritäts-Indikator aktualisieren
+    const prioritySelect = document.getElementById('{{ form.priority.id_for_label }}');
+    const priorityIndicator = document.querySelector('.priority-indicator');
+    
+    function updatePriorityIndicator() {
+        const selectedPriority = prioritySelect.value || 'medium';
+        priorityIndicator.className = `priority-indicator priority-${selectedPriority}`;
+    }
+    
+    prioritySelect.addEventListener('change', updatePriorityIndicator);
+    updatePriorityIndicator();
+    
+    // Formular-Validierung
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('{{ form.title.id_for_label }}').value.trim();
+        const description = document.getElementById('{{ form.description.id_for_label }}').value.trim();
+        
+        if (!title) {
+            e.preventDefault();
+            alert('Bitte geben Sie einen Titel für die Aufgabe ein.');
+            return false;
+        }
+        
+        if (!description) {
+            e.preventDefault();
+            alert('Bitte geben Sie eine Beschreibung für die Aufgabe ein.');
+            return false;
+        }
+        
+        // Fälligkeitsdatum-Validierung
+        const dueDate = document.getElementById('{{ form.due_date.id_for_label }}').value;
+        if (dueDate) {
+            const dueDateTime = new Date(dueDate);
+            const now = new Date();
+            
+            if (dueDateTime < now) {
+                e.preventDefault();
+                alert('Das Fälligkeitsdatum kann nicht in der Vergangenheit liegen.');
+                return false;
+            }
+        }
+    });
+    
+    // Auto-Save (alle 30 Sekunden)
+    let autoSaveTimer;
+    const formInputs = form.querySelectorAll('input, textarea, select');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                // Hier könnte Auto-Save-Logik implementiert werden
+                console.log('Auto-Save würde hier ausgeführt werden...');
+            }, 30000);
+        });
+    });
+});
+</script>
+{% endblock %} 

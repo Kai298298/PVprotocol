@@ -1,0 +1,257 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Protokolle – {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                Protokolle
+            </h1>
+            <p class="text-muted mb-0">Verwalten Sie Ihre PV-Protokolle</p>
+        </div>
+        <a href="{% url 'protocols:protocol_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Neues Protokoll
+        </a>
+    </div>
+
+    <!-- Statistiken -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-file-alt fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Gesamt</h6>
+                            <h4 class="mb-0">{{ protocols.count }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Abgeschlossen</h6>
+                            <h4 class="mb-0">{{ protocols|length }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">In Bearbeitung</h6>
+                            <h4 class="mb-0">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-download fa-2x text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Downloads</h6>
+                            <h4 class="mb-0">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Protokoll-Liste -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Alle Protokolle</h5>
+                </div>
+                <div class="col-auto">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" placeholder="Protokolle durchsuchen...">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if protocols %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">Protokoll</th>
+                                <th class="border-0">Anlage</th>
+                                <th class="border-0">Status</th>
+                                <th class="border-0">Erstellt</th>
+                                <th class="border-0 text-end">Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for protocol in protocols %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-file-alt text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">{{ protocol.title }}</h6>
+                                            <small class="text-muted">{{ protocol.template.name|default:"Keine Vorlage" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if protocol.installation %}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-solar-panel me-1"></i>
+                                            {{ protocol.installation.name }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Abgeschlossen</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ protocol.created_at|date:"d.m.Y" }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'protocols:protocol_detail' protocol.pk %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Anzeigen">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'protocols:protocol_pdf' protocol.pk %}" 
+                                           class="btn btn-sm btn-outline-success" 
+                                           title="PDF herunterladen">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <a href="{% url 'protocols:protocol_update' protocol.pk %}" 
+                                           class="btn btn-sm btn-outline-warning" 
+                                           title="Bearbeiten">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'protocols:protocol_delete' protocol.pk %}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           title="Löschen">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-file-alt fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">Keine Protokolle vorhanden</h5>
+                    <p class="text-muted">Erstellen Sie Ihr erstes Protokoll, um zu beginnen.</p>
+                    <a href="{% url 'protocols:protocol_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Erstes Protokoll erstellen
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Protokoll-Navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Suchfunktionalität
+    const searchInput = document.querySelector('input[placeholder*="durchsuchen"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

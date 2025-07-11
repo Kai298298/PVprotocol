@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ lektion.titel }} | Learning Center{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <a href="{% url 'learning_center:learning_center' %}" class="btn btn-link mb-3"><i class="bi bi-arrow-left"></i> Zurück zur Übersicht</a>
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0"><i class="bi bi-bookmark-star"></i> {{ lektion.titel }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-3 text-muted">{{ lektion.beschreibung }}</div>
+            <div class="lesson-content">
+                {{ lektion.inhalt|safe }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

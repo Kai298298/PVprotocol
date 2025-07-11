@@ -1,0 +1,56 @@
+ERROR 2025-07-10 21:39:31,027 log Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/http/request.py", line 202, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+ERROR 2025-07-10 21:39:31,075 log Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/http/request.py", line 202, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+ERROR 2025-07-10 21:39:31,082 log Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/http/request.py", line 202, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+ERROR 2025-07-10 21:39:31,105 log Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/utils/deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/Users/kairitter/Library/CloudStorage/OneDrive-Persönlich/2_Arbeit/Scraper_Tool/protokoll_tool/venv/lib/python3.12/site-packages/django/http/request.py", line 202, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '192.168.65.56:8000'. You may need to add '192.168.65.56' to ALLOWED_HOSTS.

@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Protokoll PDF Export</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #222;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            color: #fff;
+            padding: 24px 32px 16px 32px;
+            display: flex;
+            align-items: center;
+        }
+        .header img {
+            height: 48px;
+            margin-right: 24px;
+        }
+        .title {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 0.2em;
+        }
+        .section {
+            margin: 32px 32px 0 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .label {
+            font-weight: bold;
+            color: #3949ab;
+        }
+        .value {
+            margin-bottom: 8px;
+        }
+        .signature {
+            margin-top: 40px;
+            min-height: 60px;
+            border-top: 1px solid #bbb;
+            text-align: left;
+            color: #888;
+        }
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .images img {
+            max-width: 180px;
+            max-height: 120px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header" style="background: {{ branding.primary_color|default:'#1a237e' }};">
+        {% if branding.logo %}
+            <img src="{{ branding.logo }}" alt="Logo">
+        {% endif %}
+        <div>
+            <div class="title">{{ protocol.title }}</div>
+            <div>{{ protocol.installation }}</div>
+            <div style="font-size:0.9em; color:#eee;">Erstellt am: {{ protocol.created_at|date:'d.m.Y H:i' }}</div>
+        </div>
+    </div>
+    <div class="section">
+        <div class="label">Aufgabe:</div>
+        <div class="value">{{ protocol.task.title }}<br>{{ protocol.task.description }}</div>
+        {% if protocol.task.images.all %}
+            <div class="images">
+                {% for img in protocol.task.images.all %}
+                    <img src="{{ img.image.url }}" alt="Aufgabenbild">
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="section">
+        <div class="label" style="color: {{ branding.secondary_color|default:'#3949ab' }};">Protokollfelder:</div>
+        <table style="width:100%; border-collapse:collapse;">
+            <tbody>
+            {% for key, value in protocol.content.items %}
+                {% if key != 'signature' and key != 'unterschrift' %}
+                <tr style="border-bottom:1px solid #eee;">
+                    <td class="label" style="width:30%; padding:6px 0;{% if branding.secondary_color %} color: {{ branding.secondary_color }};{% endif %}">{{ key|capfirst }}</td>
+                    <td class="value" style="padding:6px 0;">
+                        {% if value and value.url %}
+                            <img src="{{ value.url }}" alt="Bild" style="max-width:180px; max-height:120px;">
+                        {% elif value is boolean %}
+                            {% if value %}✔ Ja{% else %}✗ Nein{% endif %}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="section signature">
+        <div class="label">Unterschrift:</div>
+        {% if protocol.signature_data %}
+            <img src="{{ protocol.signature_data }}" alt="Unterschrift" style="max-height:80px;">
+        {% else %}
+            <span>Keine Unterschrift vorhanden.</span>
+        {% endif %}
+    </div>
+</body>
+</html> 

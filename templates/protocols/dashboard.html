@@ -1,0 +1,108 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-container" style="display: flex; min-height: 100vh; background: #fff;">
+    <!-- Linke vertikale Navigationsleiste -->
+    <nav style="width: 70px; background: #111; display: flex; flex-direction: column; align-items: center; padding-top: 30px;">
+        <a href="#" style="margin-bottom: 30px;"><img src="{% static 'img/icon-dashboard.svg' %}" alt="Dashboard" width="32"></a>
+        <a href="#"><img src="{% static 'img/icon-tasks.svg' %}" alt="Tasks" width="32" style="margin-bottom: 30px;"></a>
+        <a href="#"><img src="{% static 'img/icon-tools.svg' %}" alt="Tools" width="32" style="margin-bottom: 30px;"></a>
+        <a href="#"><img src="{% static 'img/icon-calendar.svg' %}" alt="Calendar" width="32"></a>
+    </nav>
+
+    <!-- Hauptinhalt -->
+    <div style="flex: 1; padding: 40px 40px 0 40px;">
+        <!-- Suchleiste und Begrüßung -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <input type="text" placeholder="Suche nach Anlagen und Aufgaben" style="width: 350px; padding: 10px 16px; border-radius: 6px; border: 1px solid #ddd; font-size: 16px;">
+            <button style="background: #000; color: #fff; padding: 14px 32px; border: none; border-radius: 4px; font-size: 18px; font-weight: 600;">+ Neue Aufgabe</button>
+        </div>
+        <h2 class="fw-bold">Guten Morgen, {{ user.first_name|default:user.username }}</h2>
+        <p class="lead">Willkommen im PV-Protokoll System!</p>
+        <h3>Offene Aufgaben</h3>
+        <ul class="list-group mb-4">
+        {% for task in tasks %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ task.title }}
+            <span class="badge bg-primary rounded-pill">Fällig: {{ task.due|default:'–' }}</span>
+          </li>
+        {% empty %}
+          <li class="list-group-item">Keine offenen Aufgaben.</li>
+        {% endfor %}
+        </ul>
+
+        <!-- Dokumentationsbereich mit Diagramm (Platzhalter) -->
+        <div style="background: #fafafa; border-radius: 12px; box-shadow: 0 2px 8px #0001; padding: 32px; margin-bottom: 32px;">
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 18px;">Documentation task</h3>
+            <!-- Platzhalter für Diagramm: 8 Balken für 8 Tage, statische Höhen als Beispiel -->
+            <div style="width: 100%; height: 180px; display: flex; align-items: flex-end; gap: 8px;">
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 120px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Mon</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 100px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Tue</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 140px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Wed</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 80px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Thu</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 120px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Fri</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 60px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Sat</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 110px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Sun</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 18px; height: 130px; background: #bbb; border-radius: 4px 4px 0 0; margin-bottom: 4px;"></div>
+                    <span style="font-size: 12px; color: #888;">Mon</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rechte Spalte: Upcoming Tasks -->
+    <aside style="width: 420px; background: #fff; border-left: 1px solid #eee; padding: 40px 32px 0 32px;">
+        <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 18px;">Aufgabenplan</div>
+        <div style="display: flex; gap: 12px; margin-bottom: 18px;">
+            {% comment %} Plant-Tabs, der dritte ist aktiv {% endcomment %}
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 1</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 2</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #000; color: #fff; font-weight: 600;">Anlage 3</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 4</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 5</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 6</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 7</div>
+            <div style="padding: 6px 12px; border-radius: 6px; background: #f2f2f2; color: #222; font-weight: 600;">Anlage 8</div>
+        </div>
+        <div style="font-size: 1.1rem; font-weight: 500; margin-bottom: 12px;">Kommende Wartungen</div>
+        {% for ut in upcoming_tasks %}
+        <div style="background: #fafafa; border-radius: 8px; box-shadow: 0 1px 4px #0001; padding: 18px 18px 12px 18px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center;">
+                <div style="background: #eee; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; margin-right: 14px;">{{ ut.id }}</div>
+                <div>
+                    <div style="font-weight: 600;">{{ ut.title }}</div>
+                    <div style="color: #888; font-size: 14px;">{{ ut.desc }}</div>
+                </div>
+                <div style="margin-left: auto; color: #888; font-size: 14px;">{{ ut.time }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        <div style="text-align: center; margin-top: 24px;">
+            <button style="background: #000; color: #fff; padding: 14px 36px; border: none; border-radius: 4px; font-size: 18px; font-weight: 600;">Vollständigen Plan anzeigen</button>
+        </div>
+    </aside>
+</div>
+{% endblock %} 

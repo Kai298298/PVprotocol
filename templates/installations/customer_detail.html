@@ -1,0 +1,92 @@
+{% extends "base/base.html" %}
+{% block title %}Kunde {{ customer.customer_number }} – PV-Protokoll SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-person-circle text-primary me-2"></i>
+                {{ customer.name }}
+                <span class="badge bg-info text-dark ms-2"><i class="bi bi-hash me-1"></i>{{ customer.customer_number }}</span>
+            </h1>
+            <p class="text-muted mb-0">Kundendetails & verknüpfte Anlagen</p>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'installations:customer_update' customer.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil me-2"></i>Bearbeiten
+            </a>
+            <a href="{% url 'installations:customer_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Zurück zur Liste
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Kundendaten</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Name</dt>
+                        <dd class="col-sm-8">{{ customer.name }}</dd>
+                        <dt class="col-sm-4">E-Mail</dt>
+                        <dd class="col-sm-8">{{ customer.email }}</dd>
+                        <dt class="col-sm-4">Telefon</dt>
+                        <dd class="col-sm-8">{{ customer.phone }}</dd>
+                        <dt class="col-sm-4">Unternehmen</dt>
+                        <dd class="col-sm-8">{{ customer.company_name }}</dd>
+                        <dt class="col-sm-4">Adresse</dt>
+                        <dd class="col-sm-8">{{ customer.address|linebreaksbr }}</dd>
+                        <dt class="col-sm-4">Kundennummer</dt>
+                        <dd class="col-sm-8">{{ customer.customer_number }}</dd>
+                        <dt class="col-sm-4">Erstellt am</dt>
+                        <dd class="col-sm-8">{{ customer.created_at|date:'d.m.Y H:i' }}</dd>
+                        <dt class="col-sm-4">Letzte Änderung</dt>
+                        <dd class="col-sm-8">{{ customer.updated_at|date:'d.m.Y H:i' }}</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Verknüpfte Anlagen</h5>
+                </div>
+                <div class="card-body">
+                    {% if customer.installations.exists %}
+                        <ul class="list-group">
+                            {% for installation in customer.installations.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ installation.name }} <span class="text-muted">({{ installation.location }})</span></span>
+                                <a href="{% url 'installations:installation_detail' installation.pk %}" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="Anlagendetails anzeigen"><i class="bi bi-lightning"></i> Details</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Keine Anlagen verknüpft.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Kontakt</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Ansprechpartner:</strong><br>{{ customer.contact_person|default:"Nicht angegeben" }}</p>
+                    <p><strong>Telefon:</strong><br>{{ customer.phone|default:"Nicht angegeben" }}</p>
+                    <p><strong>E-Mail:</strong><br>{{ customer.email|default:"Nicht angegeben" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Tooltips aktivieren
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+{% endblock %} 

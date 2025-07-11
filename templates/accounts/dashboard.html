@@ -1,0 +1,41 @@
+{% extends "base/base.html" %}
+{% block title %}Dashboard – PV-Protokoll SaaS{% endblock %}
+
+{% block content %}
+<!-- Dieses Dashboard wurde durch die Anlagenübersicht ersetzt. -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ chart_data.labels|json_script:"chart-labels" }}
+{{ chart_data.values|json_script:"chart-values" }}
+<script>
+    const ctx = document.getElementById('docChart').getContext('2d');
+    const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+    const values = JSON.parse(document.getElementById('chart-values').textContent);
+    const docChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Documentation task',
+                data: values,
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: 5 }
+            }
+        }
+    });
+</script>
+<script>
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
+{% endblock %} 

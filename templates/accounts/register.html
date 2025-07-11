@@ -1,0 +1,57 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Registrieren - PV Protokoll System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow mb-4">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h2 class="text-primary">
+                        <i class="bi bi-sun me-2"></i>
+                        PV Protokoll
+                    </h2>
+                    <p class="lead">Die smarte SaaS-Lösung für Ihre PV-Protokolle & Anlagenverwaltung</p>
+                </div>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Alle PV-Anlagen und Kunden zentral verwalten</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Digitale Protokolle & Dokumentation in Sekunden</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Automatische Erinnerungen für Wartung & Service</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Intuitive Bedienung & modernes Design</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>100% DSGVO-konform & sicher gehostet</li>
+                </ul>
+                <div class="alert alert-info text-center mb-4">
+                    <strong>Jetzt kostenlos registrieren und alle Vorteile entdecken!</strong>
+                </div>
+            </div>
+        </div>
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <p class="text-muted">Registrierung</p>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" data-bs-toggle="tooltip" title="Registrieren">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Registrieren
+                        </button>
+                    </div>
+                </form>
+                <hr class="my-4">
+                <div class="text-center">
+                    <p class="mb-2">Bereits ein Konto?</p>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Anmelden">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Anmelden
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

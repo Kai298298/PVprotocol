@@ -1,0 +1,22 @@
+{% extends 'base/base.html' %}
+{% block title %}CSV-Import für Anlagen{% endblock %}
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <h2>CSV-Import für Anlagen</h2>
+    <p>Lade eine CSV-Datei hoch, um mehrere Anlagen auf einmal zu importieren.</p>
+  </div>
+  <div class="page-content">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="csv_file" class="form-label">CSV-Datei auswählen</label>
+        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Import starten</button>
+    </form>
+    <hr>
+    <p class="text-muted">Die CSV-Datei muss folgende Spalten enthalten: <code>Name, Standort, Modultyp, Modulhersteller, Betreiber (Kunden-ID), Größe, Gesamtleistung (kW), Anzahl Module, Adresse</code></p>
+  </div>
+</div>
+{% endblock %} 

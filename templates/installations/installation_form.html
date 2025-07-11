@@ -1,0 +1,167 @@
+{% extends "base/base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Neue Anlage anlegen – PV-Protokoll SaaS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-lightning-charge text-primary me-2"></i>
+                Neue PV-Anlage anlegen
+            </h1>
+            <p class="text-muted mb-0">Erfassen Sie alle relevanten Daten Ihrer neuen PV-Anlage</p>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'installations:installation_list_explicit' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Zurück zur Liste
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Bitte beheben Sie die folgenden Fehler:</strong>
+                            <ul class="mb-0">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_name" class="form-label">Name der Anlage</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-type"></i></span>
+                                    {{ form.name|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_location" class="form-label">Standort</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                    {{ form.location|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_operator" class="form-label">Betreiber/Kunde</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    {{ form.operator|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_module_type" class="form-label">Modultyp</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                                    {{ form.module_type|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_module_manufacturer" class="form-label">Modulhersteller</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                    {{ form.module_manufacturer|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_size" class="form-label">Anlagengröße (kWp)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-bar-chart"></i></span>
+                                    {{ form.size|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_total_power_kw" class="form-label">Gesamtleistung (kW)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lightning"></i></span>
+                                    {{ form.total_power_kw|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_number_of_modules" class="form-label">Anzahl der Module</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-123"></i></span>
+                                    {{ form.number_of_modules|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="id_address" class="form-label">Adresse</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-house"></i></span>
+                                    {{ form.address|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="id_profile_image" class="form-label">Profilbild der Anlage</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-image"></i></span>
+                                    {{ form.profile_image|as_crispy_field }}
+                                </div>
+                                <div id="image-preview" class="mt-2"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary">Speichern</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Hinweis
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 text-muted">Bitte geben Sie alle relevanten Daten zur neuen PV-Anlage ein. Felder mit * sind Pflichtfelder.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Bildvorschau für Profilbild
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('id_profile_image');
+        if(input) {
+            input.addEventListener('change', function(event) {
+                var preview = document.getElementById('image-preview');
+                preview.innerHTML = '';
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'img-thumbnail';
+                        img.style.maxWidth = '200px';
+                        img.style.maxHeight = '200px';
+                        preview.appendChild(img);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{# Hinweise:
+    - Das Formular ist responsiv, nutzt Bootstrap und Icons.
+    - Bild-Upload zeigt eine Vorschau.
+    - Fehler werden klar angezeigt.
+    - Felder sind einzeln gestaltet für bessere UX.
+#} 

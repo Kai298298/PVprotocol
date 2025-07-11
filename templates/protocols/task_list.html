@@ -1,0 +1,500 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Aufgabenverwaltung{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .task-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .task-card.todo { border-left-color: #6c757d; }
+    .task-card.in_progress { border-left-color: #0d6efd; }
+    .task-card.review { border-left-color: #ffc107; }
+    .task-card.completed { border-left-color: #198754; }
+    .task-card.cancelled { border-left-color: #dc3545; }
+    .task-card.on_hold { border-left-color: #0dcaf0; }
+    
+    .priority-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .overdue {
+        background-color: #f8d7da;
+        border-color: #f5c2c7;
+    }
+    
+    .filter-panel {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .bulk-actions {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .task-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .progress-ring {
+        width: 60px;
+        height: 60px;
+        position: relative;
+    }
+    
+    .progress-ring svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+    
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 4;
+    }
+    
+    .progress-ring .bg {
+        stroke: #e9ecef;
+    }
+    
+    .progress-ring .progress {
+        stroke: #0d6efd;
+        stroke-linecap: round;
+        transition: stroke-dasharray 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-tasks text-primary me-2"></i>
+                Aufgabenverwaltung
+            </h1>
+            <p class="text-muted mb-0">Verwalten Sie alle Aufgaben und Projekte</p>
+        </div>
+        <div>
+            <a href="{% url 'protocols:task_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Neue Aufgabe
+            </a>
+            <a href="{% url 'protocols:task_dashboard' %}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-chart-bar me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiken -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-tasks fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">{{ stats.total }}</h4>
+                        <small>Gesamt</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">{{ stats.todo }}</h4>
+                        <small>Zu erledigen</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-spinner fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">{{ stats.in_progress }}</h4>
+                        <small>In Bearbeitung</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">{{ stats.overdue }}</h4>
+                        <small>Überfällig</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter-Panel -->
+    <div class="filter-panel">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                {{ filter_form.search|as_crispy_field }}
+            </div>
+            <div class="col-md-2">
+                {{ filter_form.status|as_crispy_field }}
+            </div>
+            <div class="col-md-2">
+                {{ filter_form.priority|as_crispy_field }}
+            </div>
+            <div class="col-md-2">
+                {{ filter_form.assigned_to|as_crispy_field }}
+            </div>
+            <div class="col-md-2">
+                {{ filter_form.installation|as_crispy_field }}
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-light w-100 mt-4">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+        
+        <!-- Erweiterte Filter -->
+        <div class="row g-3 mt-3">
+            <div class="col-md-2">
+                {{ filter_form.due_date_from|as_crispy_field }}
+            </div>
+            <div class="col-md-2">
+                {{ filter_form.due_date_to|as_crispy_field }}
+            </div>
+            <div class="col-md-2">
+                <div class="form-check mt-4">
+                    {{ filter_form.overdue_only }}
+                    <label class="form-check-label" for="{{ filter_form.overdue_only.id_for_label }}">
+                        Nur überfällige
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'protocols:task_list' %}" class="btn btn-outline-light mt-4">
+                    <i class="fas fa-times me-2"></i>Filter zurücksetzen
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk-Aktionen -->
+    <div class="bulk-actions" id="bulkActions" style="display: none;">
+        <form method="post" action="{% url 'protocols:bulk_action_tasks' %}">
+            {% csrf_token %}
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <span id="selectedCount">0 Aufgaben ausgewählt</span>
+                </div>
+                <div class="col-md-3">
+                    {{ bulk_form.action|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    {{ bulk_form.new_status|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-light">
+                        <i class="fas fa-play me-2"></i>Aktion ausführen
+                    </button>
+                </div>
+            </div>
+            {{ bulk_form.task_ids }}
+        </form>
+    </div>
+
+    <!-- Aufgabenliste -->
+    <div class="row">
+        {% for task in tasks %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card task-card {{ task.status }} h-100" data-task-id="{{ task.id }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="task-avatar me-3">
+                                {{ task.title|first|upper }}
+                            </div>
+                            <div>
+                                <h6 class="card-title mb-1">
+                                    <a href="{% url 'protocols:task_detail' task.pk %}" class="text-decoration-none">
+                                        {{ task.title }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>
+                                    {{ task.created_by.get_full_name|default:task.created_by.username }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input task-checkbox" type="checkbox" value="{{ task.id }}">
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small mb-3">
+                        {{ task.description|truncatewords:20 }}
+                    </p>
+
+                    <!-- Tags -->
+                    {% if task.tags %}
+                    <div class="mb-3">
+                        {% for tag in task.get_tags_list %}
+                        <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Status und Priorität -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge status-badge bg-{{ task.get_status_color }}">
+                            {{ task.get_status_display }}
+                        </span>
+                        <span class="badge priority-badge bg-{{ task.get_priority_color }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                    </div>
+
+                    <!-- Fortschritt -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="progress-ring me-3">
+                                <svg>
+                                    <circle class="bg" cx="30" cy="30" r="26"></circle>
+                                    <circle class="progress" cx="30" cy="30" r="26" 
+                                            stroke-dasharray="{{ task.get_progress_percentage }}, 100"></circle>
+                                </svg>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar" style="width: {{ task.get_progress_percentage }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ task.get_progress_percentage }}% abgeschlossen</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zugewiesene Mitarbeiter -->
+                    {% if task.assigned_users.all %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Zugewiesen an:</small>
+                        <div class="d-flex flex-wrap">
+                            {% for user in task.assigned_users.all %}
+                            <div class="task-avatar me-1" style="width: 30px; height: 30px; font-size: 0.75rem;">
+                                {{ user.first_name|first|upper }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Fälligkeitsdatum -->
+                    {% if task.due_date %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Fällig: {{ task.due_date|date:"d.m.Y H:i" }}
+                        </small>
+                        {% if task.is_overdue %}
+                        <span class="badge bg-danger">Überfällig</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Aktionen -->
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                    onclick="updateTaskStatus({{ task.id }}, 'in_progress')">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm"
+                                    onclick="updateTaskStatus({{ task.id }}, 'completed')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <a href="{% url 'protocols:task_update' task.pk %}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'protocols:task_detail' task.pk %}" 
+                               class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Keine Aufgaben gefunden</h4>
+                <p class="text-muted">Erstellen Sie Ihre erste Aufgabe oder passen Sie die Filter an.</p>
+                <a href="{% url 'protocols:task_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Erste Aufgabe erstellen
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Aufgaben-Pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; Erste</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Zurück</a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Weiter</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Letzte &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Bulk-Aktionen
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.task-checkbox');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    const taskIdsField = document.querySelector('input[name="task_ids"]');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActions);
+    });
+    
+    function updateBulkActions() {
+        const selected = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        if (selected.length > 0) {
+            bulkActions.style.display = 'block';
+            selectedCount.textContent = `${selected.length} Aufgabe${selected.length > 1 ? 'n' : ''} ausgewählt`;
+            taskIdsField.value = selected.join(',');
+        } else {
+            bulkActions.style.display = 'none';
+        }
+    }
+    
+    // Alle auswählen/abwählen
+    const selectAllCheckbox = document.createElement('input');
+    selectAllCheckbox.type = 'checkbox';
+    selectAllCheckbox.className = 'form-check-input me-2';
+    selectAllCheckbox.addEventListener('change', function() {
+        checkboxes.forEach(cb => {
+            cb.checked = this.checked;
+        });
+        updateBulkActions();
+    });
+    
+    const header = document.querySelector('.d-flex.justify-content-between.align-items-center');
+    const selectAllLabel = document.createElement('label');
+    selectAllLabel.className = 'form-check-label me-3';
+    selectAllLabel.textContent = 'Alle auswählen';
+    selectAllLabel.insertBefore(selectAllCheckbox, selectAllLabel.firstChild);
+    header.appendChild(selectAllLabel);
+});
+
+// AJAX Status-Update
+function updateTaskStatus(taskId, newStatus) {
+    fetch(`/protocols/tasks/${taskId}/status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Fehler beim Aktualisieren des Status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Fehler beim Aktualisieren des Status');
+    });
+}
+</script>
+{% endblock %} 

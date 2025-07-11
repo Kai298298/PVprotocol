@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Einladung zum PV-Protokoll System</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #007bff; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f8f9fa; }
+        .button { display: inline-block; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .info { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Einladung zum PV-Protokoll System</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hallo!</p>
+            
+            <p>Sie wurden eingeladen, dem Team von <strong>{{ company_name }}</strong> im PV-Protokoll System beizutreten.</p>
+            
+            <div class="info">
+                <strong>Ihre Rolle:</strong> {{ invitation.get_role_display }}<br>
+                <strong>E-Mail:</strong> {{ invitation.email }}<br>
+                <strong>Gültig bis:</strong> {{ expires_at }}
+            </div>
+            
+            <p>Klicken Sie auf den folgenden Button, um Ihren Account zu erstellen und dem Team beizutreten:</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ invitation_url }}" class="button">
+                    🎯 Account erstellen
+                </a>
+            </div>
+            
+            <p><strong>Wichtig:</strong></p>
+            <ul>
+                <li>Der Link ist 7 Tage gültig</li>
+                <li>Sie können den Link nur einmal verwenden</li>
+                <li>Nach der Account-Erstellung werden Sie automatisch eingeloggt</li>
+            </ul>
+            
+            <p>Falls der Button nicht funktioniert, kopieren Sie diese URL in Ihren Browser:</p>
+            <p style="word-break: break-all; background: #f1f1f1; padding: 10px; border-radius: 3px;">
+                {{ invitation_url }}
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>Diese E-Mail wurde automatisch vom PV-Protokoll System generiert.</p>
+            <p>Falls Sie Fragen haben, wenden Sie sich an Ihren Administrator.</p>
+        </div>
+    </div>
+</body>
+</html> 

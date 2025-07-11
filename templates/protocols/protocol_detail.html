@@ -1,0 +1,247 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ protocol.title }} – {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                {{ protocol.title }}
+            </h1>
+            <p class="text-muted mb-0">
+                Protokoll-Details • Erstellt am {{ protocol.created_at|date:"d.m.Y H:i" }}
+            </p>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'protocols:protocol_pdf' protocol.pk %}" class="btn btn-success">
+                <i class="fas fa-download me-2"></i>PDF herunterladen
+            </a>
+            <a href="{% url 'protocols:protocol_update' protocol.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Bearbeiten
+            </a>
+            <a href="{% url 'protocols:protocol_delete' protocol.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i>Löschen
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Hauptinhalt -->
+        <div class="col-lg-8">
+            <!-- Protokoll-Inhalt -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-align-left me-2"></i>Protokoll-Inhalt
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if protocol.content %}
+                        <div class="protocol-content">
+                            {{ protocol.content|safe }}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Kein Inhalt vorhanden</h5>
+                            <p class="text-muted">Dieses Protokoll hat noch keinen Inhalt.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Anlagen-Details -->
+            {% if protocol.installation %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-solar-panel me-2"></i>Zugehörige Anlage
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{{ protocol.installation.name }}</h6>
+                            <p class="text-muted mb-2">{{ protocol.installation.address }}</p>
+                            <p class="text-muted mb-0">{{ protocol.installation.city }}, {{ protocol.installation.postal_code }}</p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-info">
+                                <i class="fas fa-bolt me-1"></i>
+                                {{ protocol.installation.power_kw }} kW
+                            </span>
+                            <br>
+                            <small class="text-muted">
+                                Installiert: {{ protocol.installation.installation_date|date:"d.m.Y" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Protokoll-Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Protokoll-Informationen
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">Status</small>
+                        <div>
+                            <span class="badge bg-success">Abgeschlossen</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Vorlage</small>
+                        <div>
+                            {% if protocol.template %}
+                                <span class="badge bg-light text-dark">{{ protocol.template.name }}</span>
+                            {% else %}
+                                <span class="text-muted">Keine Vorlage</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Erstellt von</small>
+                        <div>
+                            {% if protocol.created_by %}
+                                <span class="badge bg-primary">{{ protocol.created_by.get_full_name|default:protocol.created_by.username }}</span>
+                            {% else %}
+                                <span class="text-muted">Unbekannt</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Erstellt am</small>
+                        <div>
+                            {{ protocol.created_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                    
+                    {% if protocol.updated_at %}
+                    <div>
+                        <small class="text-muted">Zuletzt aktualisiert</small>
+                        <div>
+                            {{ protocol.updated_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Aktionen -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Aktionen
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'protocols:protocol_pdf' protocol.pk %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-download me-2"></i>PDF herunterladen
+                        </a>
+                        <a href="{% url 'protocols:protocol_update' protocol.pk %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-2"></i>Bearbeiten
+                        </a>
+                        <a href="{% url 'protocols:protocol_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Zurück zur Liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiken -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiken
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <i class="fas fa-eye fa-2x text-primary"></i>
+                            </div>
+                            <h6 class="mb-0">0</h6>
+                            <small class="text-muted">Aufrufe</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <i class="fas fa-download fa-2x text-success"></i>
+                            </div>
+                            <h6 class="mb-0">0</h6>
+                            <small class="text-muted">Downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .protocol-content {
+        line-height: 1.6;
+    }
+    
+    .protocol-content h1,
+    .protocol-content h2,
+    .protocol-content h3,
+    .protocol-content h4,
+    .protocol-content h5,
+    .protocol-content h6 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .protocol-content p {
+        margin-bottom: 1rem;
+    }
+    
+    .protocol-content ul,
+    .protocol-content ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+    
+    .protocol-content blockquote {
+        border-left: 4px solid #0d6efd;
+        padding-left: 1rem;
+        margin: 1rem 0;
+        font-style: italic;
+        color: #666;
+    }
+    
+    .protocol-content code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .protocol-content pre {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+    }
+</style>
+{% endblock %} 

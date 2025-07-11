@@ -1,0 +1,404 @@
+{% extends "base/base.html" %}
+{% block title %}Anlage {{ installation.name }} – PV-Protokoll SaaS{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS für Karten -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 300px;
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .timeline-item {
+        border-left: 3px solid #007bff;
+        padding-left: 20px;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 0;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: #007bff;
+    }
+    .timeline-item.note::before { background: #28a745; }
+    .timeline-item.maintenance::before { background: #ffc107; }
+    .timeline-item.important::before { background: #dc3545; }
+    .dashboard-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .status-badge {
+        font-size: 0.8em;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+    .profile-image-container {
+        position: relative;
+        display: inline-block;
+    }
+    .profile-image-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-lightning-charge text-primary me-2"></i>
+                {{ installation.name }}
+            </h1>
+            <p class="text-muted mb-0">Anlagendetails & Status</p>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="#" class="btn btn-warning">
+                <i class="bi bi-pencil me-2"></i>Bearbeiten
+            </a>
+            <a href="{% url 'installations:installation_list_explicit' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Zurück zur Liste
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Anlagen-Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Status:</strong><br>
+                            <span class="badge bg-info">{{ installation.get_status_display }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Priorität:</strong><br>
+                            <span class="badge bg-warning text-dark">{{ installation.get_priority_display }}</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Leistung:</strong> {{ installation.total_power_kw|default:"Nicht angegeben" }} kW
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Module:</strong> {{ installation.number_of_modules|default:"Nicht angegeben" }}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Inbetriebnahme:</strong> {{ installation.installation_date|default:"Nicht angegeben" }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Adresse:</strong> {{ installation.address|default:"Nicht angegeben" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-cpu me-2"></i>Wechselrichter</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Typ:</strong> {{ installation.inverter_type|default:"Nicht angegeben" }}</p>
+                    <p><strong>Hersteller:</strong> {{ installation.inverter_manufacturer|default:"Nicht angegeben" }}</p>
+                    <p><strong>Seriennummer:</strong> {{ installation.inverter_serial|default:"Nicht angegeben" }}</p>
+                    <p><strong>API-Endpunkt:</strong> {{ installation.api_endpoint|default:"Nicht konfiguriert" }}</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>CRM-Zeitverlauf</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                            <i class="bi bi-plus me-1"></i>Notiz
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+                            <i class="bi bi-tools me-1"></i>Wartung
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if timeline %}
+                        <div class="timeline">
+                            {% for item in timeline %}
+                                <div class="timeline-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">{{ item.title }}</h6>
+                                            <p class="text-muted mb-2">
+                                                <i class="bi bi-{% if item.type == 'note' %}sticky{% else %}tools{% endif %} me-1"></i>
+                                                {{ item.get_type_display }} • {{ item.created_at|date:"d.m.Y H:i" }}
+                                                {% if item.created_by %}• {{ item.created_by.get_full_name }}{% endif %}
+                                            </p>
+                                            <p class="mb-0">{{ item.content|linebreaks }}</p>
+                                        </div>
+                                        {% if item.is_important %}
+                                            <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Wichtig</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            <i class="bi bi-inbox display-4 mb-3"></i><br>
+                            Noch keine Einträge im Zeitverlauf vorhanden.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Daten-Dashboard</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h4>0 kW</h4>
+                            <small>Aktuelle Leistung</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>0 kWh</h4>
+                            <small>Heute erzeugt</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>0 kWh</h4>
+                            <small>Gesamt erzeugt</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h4>--°C</h4>
+                            <small>Temperatur</small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Wechselrichter-API wird später integriert
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-image me-2"></i>Titelbild</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if installation.profile_image %}
+                        <div class="profile-image-container">
+                            <img src="{{ installation.profile_image.url }}" alt="Profilbild der Anlage" class="img-fluid rounded" style="max-height: 200px;">
+                            <button class="profile-image-upload" onclick="document.getElementById('profileImageInput').click()">
+                                <i class="bi bi-camera"></i>
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="border rounded p-4" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                            <div>
+                                <i class="bi bi-image display-4 text-muted mb-3"></i>
+                                <p class="text-muted">Kein Titelbild vorhanden</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('profileImageInput').click()">
+                                    <i class="bi bi-upload me-1"></i>Titelbild hochladen
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <form id="profileImageForm" method="post" enctype="multipart/form-data" style="display: none;">
+                        {% csrf_token %}
+                        <input type="file" id="profileImageInput" name="profile_image" accept="image/*" onchange="this.form.submit()">
+                    </form>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Standortkarte</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if installation.latitude and installation.longitude %}
+                        <div id="map"></div>
+                    {% else %}
+                        <div class="p-4 text-center">
+                            <i class="bi bi-map display-4 text-muted mb-3"></i>
+                            <p class="text-muted">Keine Koordinaten verfügbar</p>
+                            <small class="text-muted">{{ installation.address|default:"Adresse nicht angegeben" }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Kontakt</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Ansprechpartner:</strong><br>{{ installation.contact_person|default:"Nicht angegeben" }}</p>
+                    <p><strong>Telefon:</strong><br>{{ installation.contact_phone|default:"Nicht angegeben" }}</p>
+                    <p><strong>E-Mail:</strong><br>{{ installation.contact_email|default:"Nicht angegeben" }}</p>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Wartung</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Letzte Wartung:</strong><br>{{ installation.last_maintenance|default:"Nicht angegeben" }}</p>
+                    <p><strong>Nächste Wartung:</strong><br>{{ installation.next_maintenance|default:"Nicht angegeben" }}</p>
+                    <p><strong>Garantieablauf:</strong><br>{{ installation.warranty_expiry|default:"Nicht angegeben" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notiz-Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Notiz hinzufügen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'installations:add_note' installation.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Titel</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Inhalt</label>
+            <textarea name="content" class="form-control" rows="4" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Typ</label>
+            <select name="note_type" class="form-select">
+              <option value="general">Allgemein</option>
+              <option value="maintenance">Wartung</option>
+              <option value="issue">Problem</option>
+              <option value="improvement">Verbesserung</option>
+              <option value="contact">Kontakt</option>
+              <option value="other">Sonstiges</option>
+            </select>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" name="is_important" class="form-check-input" id="importantNote">
+            <label class="form-check-label" for="importantNote">Wichtige Notiz</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+          <button type="submit" class="btn btn-primary">Notiz speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Wartungs-Modal -->
+<div class="modal fade" id="addMaintenanceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Wartung hinzufügen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'installations:add_maintenance' installation.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Titel</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Beschreibung</label>
+            <textarea name="description" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Wartungstyp</label>
+                <select name="maintenance_type" class="form-select" required>
+                  <option value="routine">Routinewartung</option>
+                  <option value="repair">Reparatur</option>
+                  <option value="inspection">Inspektion</option>
+                  <option value="cleaning">Reinigung</option>
+                  <option value="upgrade">Upgrade</option>
+                  <option value="emergency">Notfall</option>
+                  <option value="other">Sonstiges</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Geplantes Datum</label>
+                <input type="date" name="scheduled_date" class="form-control" required>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notizen</label>
+            <textarea name="maintenance_notes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+          <button type="submit" class="btn btn-warning">Wartung speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS für Karten -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Karten-Initialisierung
+{% if installation.latitude and installation.longitude %}
+document.addEventListener('DOMContentLoaded', function() {
+    var map = L.map('map').setView([{{ installation.latitude }}, {{ installation.longitude }}], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Marker für die Anlage
+    var marker = L.marker([{{ installation.latitude }}, {{ installation.longitude }}]).addTo(map);
+    marker.bindPopup("<b>{{ installation.name }}</b><br>{{ installation.address|default:'Keine Adresse' }}");
+});
+{% endif %}
+
+// Titelbild-Upload
+var profileImageInput = document.getElementById('profileImageInput');
+if (profileImageInput) {
+    profileImageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            document.getElementById('profileImageForm').submit();
+        }
+    });
+}
+</script>
+{% endblock %} 

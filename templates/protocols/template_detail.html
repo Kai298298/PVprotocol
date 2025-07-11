@@ -1,0 +1,230 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ template.name }} – {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-file-code text-primary me-2"></i>
+                {{ template.name }}
+            </h1>
+            <p class="text-muted mb-0">
+                Vorlagen-Details • Erstellt am {{ template.created_at|date:"d.m.Y H:i" }}
+            </p>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'protocols:template_update' template.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i>Bearbeiten
+            </a>
+            <a href="{% url 'protocols:template_delete' template.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i>Löschen
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Hauptinhalt -->
+        <div class="col-lg-8">
+            <!-- Vorlagen-Inhalt -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-code me-2"></i>Vorlagen-Inhalt
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if template.content %}
+                        <div class="template-content">
+                            <pre><code>{{ template.content }}</code></pre>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-code fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Kein Inhalt vorhanden</h5>
+                            <p class="text-muted">Diese Vorlage hat noch keinen Inhalt.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Beschreibung -->
+            {% if template.description %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-align-left me-2"></i>Beschreibung
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ template.description }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Vorlagen-Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Vorlagen-Informationen
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">Status</small>
+                        <div>
+                            {% if template.is_active %}
+                                <span class="badge bg-success">Aktiv</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inaktiv</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Typ</small>
+                        <div>
+                            <span class="badge bg-light text-dark">{{ template.template_type|default:"Standard" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Branding</small>
+                        <div>
+                            {% if template.branding %}
+                                <span class="badge bg-primary">Aktiviert</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Deaktiviert</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Erstellt von</small>
+                        <div>
+                            {% if template.created_by %}
+                                <span class="badge bg-primary">{{ template.created_by.get_full_name|default:template.created_by.username }}</span>
+                            {% else %}
+                                <span class="text-muted">Unbekannt</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Erstellt am</small>
+                        <div>
+                            {{ template.created_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                    
+                    {% if template.updated_at %}
+                    <div>
+                        <small class="text-muted">Zuletzt aktualisiert</small>
+                        <div>
+                            {{ template.updated_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Logo -->
+            {% if template.logo %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-image me-2"></i>Logo
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{{ template.logo.url }}" alt="Logo" class="img-fluid" style="max-height: 100px;">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Aktionen -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Aktionen
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'protocols:template_update' template.pk %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit me-2"></i>Bearbeiten
+                        </a>
+                        <a href="{% url 'protocols:template_list' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Zurück zur Liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiken -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiken
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <i class="fas fa-file-alt fa-2x text-primary"></i>
+                            </div>
+                            <h6 class="mb-0">0</h6>
+                            <small class="text-muted">Protokolle</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <i class="fas fa-download fa-2x text-success"></i>
+                            </div>
+                            <h6 class="mb-0">0</h6>
+                            <small class="text-muted">Downloads</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-content pre {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        overflow-x: auto;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .template-content code {
+        font-family: 'Courier New', monospace;
+        color: #333;
+    }
+    
+    /* Syntax-Highlighting für HTML */
+    .template-content code .tag {
+        color: #d63384;
+    }
+    
+    .template-content code .attr {
+        color: #0d6efd;
+    }
+    
+    .template-content code .string {
+        color: #198754;
+    }
+</style>
+{% endblock %} 

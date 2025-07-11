@@ -1,0 +1,36 @@
+{% extends "base/base.html" %}
+{% block title %}Profil bearbeiten – PV-Protokoll SaaS{% endblock %}
+{% block content %}
+<div class="container py-5" style="background: #fff; border-radius: 12px; max-width: 700px;">
+  <h2 class="fw-bold mb-4">Profil bearbeiten</h2>
+  <form method="post" enctype="multipart/form-data" class="mb-4">
+    {% csrf_token %}
+    {% for field in form %}
+      {% if field.name in 'notify_on_new_employee notify_on_role_change notify_on_new_task notify_on_new_installation notify_on_maintenance_done' %}
+        {% if forloop.first %}
+        <fieldset class="mb-4 p-3 border rounded bg-light">
+          <legend class="fs-5 mb-3">E-Mail-Benachrichtigungen</legend>
+        {% endif %}
+        <div class="form-check mb-2">
+          {{ field }}
+          <label class="form-check-label">{{ field.label }}</label>
+        </div>
+        {% if forloop.last %}
+        </fieldset>
+        {% endif %}
+      {% else %}
+        <div class="mb-3">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for error in field.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Speichern</button>
+    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary ms-2">Abbrechen</a>
+  </form>
+</div>
+{% endblock %} 

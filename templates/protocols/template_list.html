@@ -1,0 +1,252 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Protokollvorlagen – {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-file-code text-primary me-2"></i>
+                Protokollvorlagen
+            </h1>
+            <p class="text-muted mb-0">Verwalten Sie Ihre Protokollvorlagen</p>
+        </div>
+        <a href="{% url 'protocols:template_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Neue Vorlage
+        </a>
+    </div>
+
+    <!-- Statistiken -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-file-code fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Gesamt</h6>
+                            <h4 class="mb-0">{{ templates.count }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Aktiv</h6>
+                            <h4 class="mb-0">{{ templates|length }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Inaktiv</h6>
+                            <h4 class="mb-0">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info bg-opacity-10">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-download fa-2x text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-0">Verwendungen</h6>
+                            <h4 class="mb-0">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vorlagen-Liste -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Alle Vorlagen</h5>
+                </div>
+                <div class="col-auto">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" placeholder="Vorlagen durchsuchen...">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if templates %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">Vorlage</th>
+                                <th class="border-0">Typ</th>
+                                <th class="border-0">Status</th>
+                                <th class="border-0">Erstellt</th>
+                                <th class="border-0 text-end">Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for template in templates %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="avatar avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-file-code text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">{{ template.name }}</h6>
+                                            <small class="text-muted">{{ template.description|default:"Keine Beschreibung" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-tag me-1"></i>
+                                        {{ template.template_type|default:"Standard" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if template.is_active %}
+                                        <span class="badge bg-success">Aktiv</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inaktiv</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ template.created_at|date:"d.m.Y" }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'protocols:template_detail' template.pk %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Anzeigen">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'protocols:template_update' template.pk %}" 
+                                           class="btn btn-sm btn-outline-warning" 
+                                           title="Bearbeiten">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'protocols:template_delete' template.pk %}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           title="Löschen">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-file-code fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">Keine Vorlagen vorhanden</h5>
+                    <p class="text-muted">Erstellen Sie Ihre erste Protokollvorlage, um zu beginnen.</p>
+                    <a href="{% url 'protocols:template_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Erste Vorlage erstellen
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Vorlagen-Navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Suchfunktionalität
+    const searchInput = document.querySelector('input[placeholder*="durchsuchen"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

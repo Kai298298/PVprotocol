@@ -1,0 +1,453 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Vorlage bearbeiten{% else %}Neue Vorlage{% endif %} – {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-file-code text-primary me-2"></i>
+                {% if object %}Vorlage bearbeiten{% else %}Neue Vorlage{% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if object %}
+                    Bearbeiten Sie die Vorlagen-Details
+                {% else %}
+                    Erstellen Sie eine neue Protokollvorlage
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% url 'protocols:template_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Zurück zur Liste
+        </a>
+    </div>
+
+    <!-- Formular -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Vorlagen-Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-heading me-1"></i>Name
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Typ -->
+                        <div class="mb-3">
+                            <label for="{{ form.template_type.id_for_label }}" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Vorlagentyp
+                            </label>
+                            {{ form.template_type }}
+                            {% if form.template_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.template_type.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Beschreibung -->
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Beschreibung
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Inhalt (Drag&Drop-Editor) -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-list-ul me-1"></i>Vorlagen-Felder (Drag&Drop)
+                            </label>
+                            <div id="fields-editor" class="border rounded p-3 mb-2 bg-light">
+                                <ul id="fields-list" class="list-group mb-2">
+                                    <!-- Dynamisch generiert -->
+                                </ul>
+                                <div class="d-flex gap-2 mb-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="add-text-field"><i class="fas fa-font me-1"></i>Textfeld</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="add-number-field"><i class="fas fa-hashtag me-1"></i>Zahlenfeld</button>
+                                    <button type="button" class="btn btn-outline-info btn-sm" id="add-date-field"><i class="fas fa-calendar-alt me-1"></i>Datum</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="add-signature-field"><i class="fas fa-pen-nib me-1"></i>Unterschrift</button>
+                                </div>
+                                <input type="hidden" name="content" id="fields-json">
+                            </div>
+                        </div>
+                        <script src="{% static 'sortable.min.js' %}"></script>
+                        <script>
+                        // --- Feld-Template als Funktion ---
+                        function createFieldElement(type, label) {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex align-items-center gap-2';
+                            li.setAttribute('data-type', type);
+                            // Drag-Handle
+                            const drag = document.createElement('span');
+                            drag.className = 'me-2 text-secondary';
+                            drag.innerHTML = '<i class="fas fa-grip-vertical"></i>';
+                            // Typ-Label
+                            const typelabel = document.createElement('span');
+                            typelabel.className = 'badge bg-light text-dark border me-2';
+                            typelabel.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                            // Titel-Input
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.className = 'form-control form-control-sm me-2';
+                            input.placeholder = 'Feldtitel';
+                            input.value = label || '';
+                            input.style.maxWidth = '220px';
+                            // Löschen-Button
+                            const del = document.createElement('button');
+                            del.type = 'button';
+                            del.className = 'btn btn-outline-danger btn-sm';
+                            del.innerHTML = '<i class="fas fa-trash"></i>';
+                            del.onclick = function() {
+                                li.remove();
+                                updateFieldsJson();
+                            };
+                            // Input-Änderung
+                            input.oninput = updateFieldsJson;
+                            // Zusammenbauen
+                            li.appendChild(drag);
+                            li.appendChild(typelabel);
+                            li.appendChild(input);
+                            li.appendChild(del);
+                            return li;
+                        }
+                        // --- Felder-JSON aktualisieren ---
+                        function updateFieldsJson() {
+                            const list = document.getElementById('fields-list');
+                            const fields = [];
+                            list.querySelectorAll('li').forEach(li => {
+                                fields.push({
+                                    type: li.getAttribute('data-type'),
+                                    label: li.querySelector('input').value
+                                });
+                            });
+                            document.getElementById('fields-json').value = JSON.stringify(fields);
+                        }
+                        // --- Feld hinzufügen Handler ---
+                        document.getElementById('add-text-field').onclick = function() {
+                            const li = createFieldElement('text', '');
+                            document.getElementById('fields-list').appendChild(li);
+                            updateFieldsJson();
+                        };
+                        document.getElementById('add-number-field').onclick = function() {
+                            const li = createFieldElement('number', '');
+                            document.getElementById('fields-list').appendChild(li);
+                            updateFieldsJson();
+                        };
+                        document.getElementById('add-date-field').onclick = function() {
+                            const li = createFieldElement('date', '');
+                            document.getElementById('fields-list').appendChild(li);
+                            updateFieldsJson();
+                        };
+                        document.getElementById('add-signature-field').onclick = function() {
+                            const li = createFieldElement('signature', '');
+                            document.getElementById('fields-list').appendChild(li);
+                            updateFieldsJson();
+                        };
+                        // --- Sortable initialisieren ---
+                        new Sortable(document.getElementById('fields-list'), {
+                            animation: 150,
+                            handle: 'span',
+                            onSort: updateFieldsJson
+                        });
+                        // --- Beim Laden evtl. vorhandene Felder aus JSON laden ---
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const json = document.getElementById('fields-json').value;
+                            if (json) {
+                                try {
+                                    const fields = JSON.parse(json);
+                                    fields.forEach(f => {
+                                        const li = createFieldElement(f.type, f.label);
+                                        document.getElementById('fields-list').appendChild(li);
+                                    });
+                                } catch(e) {}
+                            }
+                            updateFieldsJson();
+                        });
+                        </script>
+
+                        <!-- Logo -->
+                        <div class="mb-3">
+                            <label for="{{ form.logo.id_for_label }}" class="form-label">
+                                <i class="fas fa-image me-1"></i>Logo
+                            </label>
+                            {{ form.logo }}
+                            {% if form.logo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.logo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Branding -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.branding }}
+                                <label class="form-check-label" for="{{ form.branding.id_for_label }}">
+                                    <i class="fas fa-palette me-1"></i>Branding aktivieren
+                                </label>
+                                {% if form.branding.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.branding.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Aktiv -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    <i class="fas fa-check-circle me-1"></i>Vorlage ist aktiv
+                                </label>
+                                {% if form.is_active.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.is_active.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'protocols:template_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Abbrechen
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if object %}Aktualisieren{% else %}Erstellen{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Hilfe -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Hilfe
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Name</h6>
+                        <p class="small text-muted mb-0">
+                            Geben Sie einen aussagekräftigen Namen für die Vorlage ein.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Typ</h6>
+                        <p class="small text-muted mb-0">
+                            Wählen Sie den passenden Vorlagentyp aus.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Inhalt</h6>
+                        <p class="small text-muted mb-0">
+                            Verwenden Sie HTML und Django-Template-Tags für die Vorlage.
+                        </p>
+                    </div>
+                    <div>
+                        <h6 class="text-primary">Logo</h6>
+                        <p class="small text-muted mb-0">
+                            Laden Sie ein Logo für die Vorlage hoch.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template-Tags -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-code me-2"></i>Verfügbare Tags
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="small">
+                        <p><strong>Anlagen-Daten:</strong></p>
+                        <ul class="list-unstyled">
+                            <li><code>{{ installation.name }}</code> - Anlagenname</li>
+                            <li><code>{{ installation.address }}</code> - Adresse</li>
+                            <li><code>{{ installation.power_kw }}</code> - Leistung</li>
+                        </ul>
+                        <p><strong>Protokoll-Daten:</strong></p>
+                        <ul class="list-unstyled">
+                            <li><code>{{ protocol.title }}</code> - Protokolltitel</li>
+                            <li><code>{{ protocol.content }}</code> - Inhalt</li>
+                            <li><code>{{ protocol.created_at }}</code> - Erstellungsdatum</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vorschau -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-eye me-2"></i>Vorschau
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">
+                        Die Vorschau wird automatisch aktualisiert, wenn Sie Änderungen vornehmen.
+                    </p>
+                    <button type="button" class="btn btn-outline-primary btn-sm w-100" id="previewBtn">
+                        <i class="fas fa-eye me-2"></i>Vorschau anzeigen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Formular-Styling */
+    .form-control, .form-select {
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Textarea für Template-Inhalt */
+    textarea {
+        min-height: 300px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    /* Checkbox-Styling */
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'sortable.min.js' %}"></script>
+<script>
+// Drag&Drop-Editor für Felder
+function renderFields(fields) {
+    const list = document.getElementById('fields-list');
+    list.innerHTML = '';
+    fields.forEach((field, idx) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex align-items-center justify-content-between';
+        li.setAttribute('data-id', idx);
+        li.innerHTML = `
+            <span><i class="fas fa-grip-vertical me-2 text-secondary"></i><strong>${field.label}</strong> <span class="badge bg-secondary ms-2">${field.type}</span></span>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-field-btn"><i class="fas fa-trash"></i></button>
+        `;
+        li.querySelector('.remove-field-btn').onclick = () => {
+            fields.splice(idx, 1);
+            renderFields(fields);
+            updateContentField(fields);
+        };
+        list.appendChild(li);
+    });
+    Sortable.create(list, {
+        animation: 150,
+        onEnd: function (evt) {
+            const [removed] = fields.splice(evt.oldIndex, 1);
+            fields.splice(evt.newIndex, 0, removed);
+            renderFields(fields);
+            updateContentField(fields);
+        }
+    });
+    updateContentField(fields);
+}
+function updateContentField(fields) {
+    document.getElementById('id_content').value = JSON.stringify(fields);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    // Formular-Validierung
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('{{ form.name.id_for_label }}');
+            if (!name.value.trim()) {
+                e.preventDefault();
+                name.classList.add('is-invalid');
+                return false;
+            }
+        });
+    }
+    
+    // Live-Validierung
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+    
+    // Felder initialisieren
+    let fields = [];
+    try {
+        const initial = document.getElementById('id_content').value;
+        if (initial) fields = JSON.parse(initial);
+    } catch (e) {}
+    renderFields(fields);
+    document.getElementById('add-field-btn').onclick = function() {
+        const label = document.getElementById('new-field-label').value.trim();
+        const type = document.getElementById('new-field-type').value;
+        if (label) {
+            fields.push({label, type});
+            renderFields(fields);
+            document.getElementById('new-field-label').value = '';
+        }
+    };
+    
+    // Vorschau-Funktionalität
+    const previewBtn = document.getElementById('previewBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', function() {
+            // Hier könnte eine AJAX-Anfrage für die Vorschau implementiert werden
+            alert('Vorschau-Funktion wird implementiert...');
+        });
+    }
+});
+</script>
+{% endblock %} 

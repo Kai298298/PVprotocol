@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PV-Protokoll SaaS{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.ico">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f6f8fa;
+      color: #222;
+    }
+    .main-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: row;
+    }
+    .sidebar {
+      width: 220px;
+      background: #2563eb;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    .sidebar .nav-link {
+      color: #e0e7ef;
+      font-weight: 500;
+      padding: 1rem 1.5rem;
+      border-radius: 0 2rem 2rem 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sidebar .nav-link.active, .sidebar .nav-link:hover {
+      background: #1e40af;
+      color: #fff;
+    }
+    .sidebar .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 2rem 1.5rem 1rem 1.5rem;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .sidebar .logo i {
+      font-size: 2rem;
+    }
+    .content {
+      flex: 1;
+      padding: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 64px;
+    }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e0e7ef;
+      border: 2px solid #2563eb;
+    }
+    .footer {
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 0.95rem;
+      padding: 1.2rem 2rem;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      margin-top: auto;
+    }
+    
+    /* Einheitliches Design-System */
+    .page-container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin: 0 auto;
+      max-width: 1200px;
+      width: 100%;
+    }
+    .page-header {
+      padding: 2rem 2rem 1.5rem 2rem;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px 12px 0 0;
+    }
+    .page-header h2 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+    .page-header .header-actions {
+      margin-top: 1rem;
+    }
+    .page-content {
+      padding: 2rem;
+    }
+    .search-section {
+      background: #f8f9fa;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .table-section {
+      padding: 0 2rem 2rem 2rem;
+    }
+    .data-table {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .data-table .table {
+      margin: 0;
+    }
+    .data-table .table thead th {
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      font-weight: 600;
+      color: #495057;
+      padding: 1rem;
+    }
+    .data-table .table tbody td {
+      padding: 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid #f1f3f4;
+    }
+    .data-table .table tbody tr:hover {
+      background: #f8f9fa;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      transform: translateY(-1px);
+    }
+    .btn-outline-primary {
+      border-color: #667eea;
+      color: #667eea;
+    }
+    .btn-outline-primary:hover {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    .badge {
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+    }
+    .pagination .page-link {
+      color: #667eea;
+      border-color: #dee2e6;
+    }
+    .pagination .page-item.active .page-link {
+      background: #667eea;
+      border-color: #667eea;
+    }
+    .form-control:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .input-group-text {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+    
+    @media (max-width: 900px) {
+      .main-container { flex-direction: column; }
+      .sidebar { flex-direction: row; width: 100vw; min-height: unset; height: 60px; }
+      .sidebar .logo { padding: 1rem; font-size: 1.1rem; }
+      .sidebar .nav { flex-direction: row; gap: 0.5rem; }
+      .sidebar .nav-link { border-radius: 1rem; padding: 0.7rem 1rem; font-size: 1rem; }
+      .page-container { margin: 1rem; }
+      .page-header { padding: 1.5rem; }
+      .page-content { padding: 1.5rem; }
+      .search-section { padding: 1rem 1.5rem; }
+      .table-section { padding: 0 1.5rem 1.5rem 1.5rem; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="main-container">
+    <nav class="sidebar">
+      <a href="/installations/" class="logo"><i class="bi bi-sun"></i> PV-Protokoll</a>
+      <div class="nav flex-column mt-2">
+        <a href="/installations/" class="nav-link{% if request.path == '/installations/' %} active{% endif %}"><i class="bi bi-house"></i> Dashboard</a>
+        <a href="/installations/list/" class="nav-link{% if request.path == '/installations/list/' %} active{% endif %}"><i class="bi bi-lightning-charge"></i> Anlagen</a>
+        <a href="/installations/customers/" class="nav-link{% if 'customers' in request.path %} active{% endif %}"><i class="bi bi-people"></i> Kunden</a>
+        <!-- PV-Anlagen-Link entfällt, da Dashboard jetzt die Anlagenübersicht ist -->
+        <a href="/protocols/protocols/" class="nav-link{% if request.path|slice:':11' == '/protocols' and 'templates' not in request.path %} active{% endif %}"><i class="bi bi-journal-text"></i> Protokolle</a>
+        <a href="/protocols/templates/" class="nav-link{% if 'templates' in request.path %} active{% endif %}"><i class="bi bi-file-earmark-text"></i> Vorlagen</a>
+        <a href="/accounts/users/" class="nav-link{% if request.path|slice:':15' == '/accounts/users' %} active{% endif %}"><i class="bi bi-people"></i> Mitarbeiter</a>
+        <a href="/protocols/tasks/" class="nav-link{% if request.path|slice:':15' == '/protocols/tasks' %} active{% endif %}"><i class="bi bi-list-task"></i> Aufgaben</a>
+        <a href="/accounts/profile/" class="nav-link{% if request.path == '/accounts/profile/' %} active{% endif %}"><i class="bi bi-person"></i> Profil</a>
+        <a href="/learning/" class="nav-link{% if request.path|slice:':9' == '/learning' %} active{% endif %}" style="position: absolute; bottom: 1.5rem; width: 90%;">
+            <i class="bi bi-journal-richtext"></i> Learning Center
+        </a>
+      </div>
+    </nav>
+    <div class="content">
+      <header class="header">
+        <div></div>
+        <div class="user-menu">
+          {% if user.is_authenticated %}
+            <span>{{ user.get_full_name|default:user.username }}</span>
+            {% if user.profile_image %}
+              <img src="{{ user.profile_image.url }}" alt="Avatar" class="user-avatar">
+            {% else %}
+              <span class="user-avatar d-inline-flex align-items-center justify-content-center bg-primary text-white">{{ user.first_name|default:user.username|slice:':1'|upper }}</span>
+            {% endif %}
+            <a href="/accounts/logout/" class="btn btn-outline-secondary btn-sm ms-2">Logout</a>
+          {% else %}
+            <a href="/accounts/login/" class="btn btn-primary btn-sm">Login</a>
+          {% endif %}
+        </div>
+      </header>
+      <main class="flex-grow-1" style="padding: 2.5rem 2rem 2rem 2rem;">
+        {% if messages %}
+          <div class="feedback-messages position-fixed top-0 start-50 translate-middle-x mt-4" style="z-index: 2000; min-width: 320px; max-width: 90vw;">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} d-flex align-items-center shadow fade show mb-2" role="alert" style="font-size:1.1rem;">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>{{ message }}</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Schließen"></button>
+              </div>
+            {% endfor %}
+          </div>
+          <script>
+            setTimeout(() => {
+              document.querySelectorAll('.feedback-messages .alert').forEach(el => {
+                if (!el.classList.contains('alert-important')) {
+                  el.classList.remove('show');
+                  setTimeout(() => el.remove(), 500);
+                }
+              });
+            }, 3500);
+          </script>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </main>
+      <footer class="footer">
+        &copy; {{ now|date:'Y' }} PV-Protokoll SaaS &ndash; <a href="/impressum/">Impressum</a> &middot; <a href="/datenschutz/">Datenschutz</a>
+      </footer>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html> 

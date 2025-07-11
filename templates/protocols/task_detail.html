@@ -1,0 +1,489 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ task.title }} - Aufgabenverwaltung{% endblock %}
+
+{% block extra_css %}
+<style>
+    .task-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .status-badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+    
+    .priority-badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .note-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .note-author {
+        font-weight: bold;
+        color: #0d6efd;
+    }
+    
+    .note-time {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .progress-ring {
+        width: 80px;
+        height: 80px;
+        position: relative;
+    }
+    
+    .progress-ring svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+    
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 6;
+    }
+    
+    .progress-ring .bg {
+        stroke: #e9ecef;
+    }
+    
+    .progress-ring .progress {
+        stroke: #0d6efd;
+        stroke-linecap: round;
+        transition: stroke-dasharray 0.3s ease;
+    }
+    
+    .task-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .action-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .overdue {
+        background-color: #f8d7da;
+        border-color: #f5c2c7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Zurück-Button -->
+    <div class="mb-3">
+        <a href="{% url 'protocols:task_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Zurück zur Übersicht
+        </a>
+    </div>
+
+    <!-- Task-Header -->
+    <div class="task-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="task-avatar me-3">
+                        {{ task.title|first|upper }}
+                    </div>
+                    <div>
+                        <h1 class="h2 mb-1">{{ task.title }}</h1>
+                        <p class="mb-0 opacity-75">{{ task.description|truncatewords:30 }}</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge status-badge bg-{{ task.get_status_color }}">
+                        {{ task.get_status_display }}
+                    </span>
+                    <span class="badge priority-badge bg-{{ task.get_priority_color }}">
+                        {{ task.get_priority_display }}
+                    </span>
+                    {% if task.is_overdue %}
+                    <span class="badge bg-danger">Überfällig</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4 text-md-end">
+                <div class="d-flex justify-content-md-end gap-2 mb-3">
+                    <button type="button" class="btn btn-light action-btn" 
+                            onclick="updateTaskStatus('{{ task.id }}', 'in_progress')">
+                        <i class="fas fa-play me-2"></i>Starten
+                    </button>
+                    <button type="button" class="btn btn-light action-btn"
+                            onclick="updateTaskStatus('{{ task.id }}', 'completed')">
+                        <i class="fas fa-check me-2"></i>Abschließen
+                    </button>
+                    <a href="{% url 'protocols:task_update' task.pk %}" 
+                       class="btn btn-light action-btn">
+                        <i class="fas fa-edit me-2"></i>Bearbeiten
+                    </a>
+                </div>
+                
+                <!-- Fortschritt -->
+                <div class="d-flex align-items-center justify-content-md-end">
+                    <div class="progress-ring me-3">
+                        <svg>
+                            <circle class="bg" cx="40" cy="40" r="34"></circle>
+                            <circle class="progress" cx="40" cy="40" r="34" 
+                                    stroke-dasharray="{{ task.get_progress_percentage }}, 100"></circle>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">{{ task.get_progress_percentage }}%</h4>
+                        <small class="text-light">abgeschlossen</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Hauptinhalt -->
+        <div class="col-lg-8">
+            <!-- Beschreibung -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle text-primary me-2"></i>
+                    Beschreibung
+                </h5>
+                <p class="mb-0">{{ task.description|linebreaks }}</p>
+            </div>
+
+            <!-- Notizen -->
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments text-primary me-2"></i>
+                        Notizen ({{ notes.count }})
+                    </h5>
+                    <button type="button" class="btn btn-primary btn-sm" 
+                            data-bs-toggle="collapse" data-bs-target="#addNoteForm">
+                        <i class="fas fa-plus me-2"></i>Notiz hinzufügen
+                    </button>
+                </div>
+
+                <!-- Notiz-Formular -->
+                <div class="collapse mb-3" id="addNoteForm">
+                    <div class="card card-body">
+                        <form method="post" action="{% url 'protocols:add_task_note' task.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ note_form.content|as_crispy_field }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Notiz speichern
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notizen-Liste -->
+                {% for note in notes %}
+                <div class="note-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="note-author">{{ note.author.get_full_name|default:note.author.username }}</span>
+                            <span class="note-time ms-2">{{ note.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        {% if user == note.author or user.is_superuser %}
+                        <form method="post" action="{% url 'protocols:delete_task_note' note.id %}" 
+                              style="display: inline;" onsubmit="return confirm('Notiz wirklich löschen?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <p class="mb-0">{{ note.content|linebreaks }}</p>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-comments fa-2x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Noch keine Notizen vorhanden.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Ähnliche Aufgaben -->
+            {% if similar_tasks %}
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-link text-primary me-2"></i>
+                    Ähnliche Aufgaben
+                </h5>
+                <div class="row">
+                    {% for similar_task in similar_tasks %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <a href="{% url 'protocols:task_detail' similar_task.pk %}" 
+                                       class="text-decoration-none">
+                                        {{ similar_task.title }}
+                                    </a>
+                                </h6>
+                                <p class="card-text small text-muted">
+                                    {{ similar_task.description|truncatewords:15 }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-{{ similar_task.get_status_color }}">
+                                        {{ similar_task.get_status_display }}
+                                    </span>
+                                    <small class="text-muted">
+                                        {{ similar_task.created_at|date:"d.m.Y" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Details -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-cog text-primary me-2"></i>
+                    Details
+                </h5>
+                
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Status</small>
+                        <span class="badge bg-{{ task.get_status_color }}">
+                            {{ task.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Priorität</small>
+                        <span class="badge bg-{{ task.get_priority_color }}">
+                            {{ task.get_priority_display }}
+                        </span>
+                    </div>
+                </div>
+
+                {% if task.installation %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Anlage</small>
+                    <a href="{% url 'installations:installation_detail' task.installation.pk %}" 
+                       class="text-decoration-none">
+                        {{ task.installation.name }}
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if task.due_date %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Fälligkeitsdatum</small>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar me-2"></i>
+                        {{ task.due_date|date:"d.m.Y H:i" }}
+                        {% if task.is_overdue %}
+                        <span class="badge bg-danger ms-2">Überfällig</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if task.estimated_hours or task.actual_hours %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Zeitaufwand</small>
+                    <div class="row">
+                        {% if task.estimated_hours %}
+                        <div class="col-6">
+                            <small>Geschätzt:</small><br>
+                            {{ task.estimated_hours }}h
+                        </div>
+                        {% endif %}
+                        {% if task.actual_hours %}
+                        <div class="col-6">
+                            <small>Tatsächlich:</small><br>
+                            {{ task.actual_hours }}h
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if task.tags %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Tags</small>
+                    {% for tag in task.get_tags_list %}
+                    <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Erstellt von</small>
+                    <div class="d-flex align-items-center">
+                        <div class="task-avatar me-2" style="width: 30px; height: 30px; font-size: 0.875rem;">
+                            {{ task.created_by.first_name|first|upper }}
+                        </div>
+                        {{ task.created_by.get_full_name|default:task.created_by.username }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">Erstellt am</small>
+                    {{ task.created_at|date:"d.m.Y H:i" }}
+                </div>
+
+                {% if task.started_at %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Gestartet am</small>
+                    {{ task.started_at|date:"d.m.Y H:i" }}
+                </div>
+                {% endif %}
+
+                {% if task.completed_at %}
+                <div class="mb-3">
+                    <small class="text-muted d-block">Abgeschlossen am</small>
+                    {{ task.completed_at|date:"d.m.Y H:i" }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Zugewiesene Mitarbeiter -->
+            {% if task.assigned_users.all %}
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-users text-primary me-2"></i>
+                    Zugewiesene Mitarbeiter
+                </h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for user in task.assigned_users.all %}
+                    <div class="d-flex align-items-center">
+                        <div class="task-avatar me-2" style="width: 35px; height: 35px; font-size: 0.875rem;">
+                            {{ user.first_name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-bold">{{ user.get_full_name|default:user.username }}</div>
+                            <small class="text-muted">{{ user.email }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bilder -->
+            {% if task.images.all %}
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-images text-primary me-2"></i>
+                    Bilder ({{ task.images.count }})
+                </h5>
+                <div class="row">
+                    {% for image in task.images.all %}
+                    <div class="col-6 mb-2">
+                        <img src="{{ image.image.url }}" class="img-fluid rounded" 
+                             alt="Aufgabenbild" style="max-height: 100px; object-fit: cover;">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Aktionen -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-tools text-primary me-2"></i>
+                    Aktionen
+                </h5>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary" 
+                            onclick="updateTaskStatus('{{ task.id }}', 'in_progress')">
+                        <i class="fas fa-play me-2"></i>Aufgabe starten
+                    </button>
+                    <button type="button" class="btn btn-success"
+                            onclick="updateTaskStatus('{{ task.id }}', 'completed')">
+                        <i class="fas fa-check me-2"></i>Aufgabe abschließen
+                    </button>
+                    <a href="{% url 'protocols:task_update' task.pk %}" 
+                       class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-2"></i>Aufgabe bearbeiten
+                    </a>
+                    <a href="{% url 'protocols:task_delete' task.pk %}" 
+                       class="btn btn-outline-danger"
+                       onclick="return confirm('Aufgabe wirklich löschen?')">
+                        <i class="fas fa-trash me-2"></i>Aufgabe löschen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateTaskStatus(taskId, newStatus) {
+    fetch(`/protocols/tasks/${taskId}/status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `status=${newStatus}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Fehler beim Aktualisieren des Status');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Fehler beim Aktualisieren des Status');
+    });
+}
+</script>
+{% endblock %} 

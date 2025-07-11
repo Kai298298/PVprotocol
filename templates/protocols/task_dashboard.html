@@ -1,0 +1,489 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Aufgaben-Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .stats-todo { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); }
+    .stats-progress { background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); }
+    .stats-completed { background: linear-gradient(135deg, #198754 0%, #146c43 100%); }
+    .stats-overdue { background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%); }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .task-list-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .task-item {
+        border-left: 4px solid transparent;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .task-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .task-item.todo { border-left-color: #6c757d; }
+    .task-item.in_progress { border-left-color: #0d6efd; }
+    .task-item.completed { border-left-color: #198754; }
+    .task-item.overdue { border-left-color: #dc3545; background: #f8d7da; }
+    
+    .priority-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .progress-ring {
+        width: 40px;
+        height: 40px;
+        position: relative;
+    }
+    
+    .progress-ring svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+    
+    .progress-ring circle {
+        fill: none;
+        stroke-width: 3;
+    }
+    
+    .progress-ring .bg {
+        stroke: #e9ecef;
+    }
+    
+    .progress-ring .progress {
+        stroke: #0d6efd;
+        stroke-linecap: round;
+    }
+    
+    .quick-actions {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">
+                    <i class="fas fa-chart-bar me-3"></i>
+                    Aufgaben-Dashboard
+                </h1>
+                <p class="mb-0 opacity-75">
+                    Übersicht über alle Aufgaben, Statistiken und aktuelle Projekte
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'protocols:task_create' %}" class="btn btn-light me-2">
+                    <i class="fas fa-plus me-2"></i>Neue Aufgabe
+                </a>
+                <a href="{% url 'protocols:task_list' %}" class="btn btn-outline-light">
+                    <i class="fas fa-list me-2"></i>Alle Aufgaben
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiken -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="stats-card text-center">
+                <div class="stats-icon stats-total">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3 class="mb-1">{{ stats.total }}</h3>
+                <small class="text-muted">Gesamt</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card text-center">
+                <div class="stats-icon stats-todo">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="mb-1">{{ stats.todo }}</h3>
+                <small class="text-muted">Zu erledigen</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card text-center">
+                <div class="stats-icon stats-progress">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <h3 class="mb-1">{{ stats.in_progress }}</h3>
+                <small class="text-muted">In Bearbeitung</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card text-center">
+                <div class="stats-icon stats-completed">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3 class="mb-1">{{ stats.completed }}</h3>
+                <small class="text-muted">Abgeschlossen</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card text-center">
+                <div class="stats-icon stats-overdue">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="mb-1">{{ stats.overdue }}</h3>
+                <small class="text-muted">Überfällig</small>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="stats-card text-center">
+                <div class="stats-icon stats-total">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <h3 class="mb-1">
+                    {% if stats.total > 0 %}
+                        {{ stats.completed|floatformat:0 }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </h3>
+                <small class="text-muted">Fertigstellung</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Linke Spalte -->
+        <div class="col-lg-8">
+            <!-- Fortschritts-Chart -->
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-pie text-primary me-2"></i>
+                    Aufgaben nach Status
+                </h5>
+                <canvas id="statusChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Neueste Aufgaben -->
+            <div class="task-list-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock text-primary me-2"></i>
+                        Neueste Aufgaben
+                    </h5>
+                    <a href="{% url 'protocols:task_list' %}" class="btn btn-outline-primary btn-sm">
+                        Alle anzeigen
+                    </a>
+                </div>
+                
+                {% for task in recent_tasks %}
+                <div class="task-item {{ task.status }}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                                <a href="{% url 'protocols:task_detail' task.pk %}" class="text-decoration-none">
+                                    {{ task.title }}
+                                </a>
+                            </h6>
+                            <p class="mb-2 text-muted small">
+                                {{ task.description|truncatewords:15 }}
+                            </p>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-{{ task.get_status_color }}">
+                                    {{ task.get_status_display }}
+                                </span>
+                                <span class="badge priority-badge bg-{{ task.get_priority_color }}">
+                                    {{ task.get_priority_display }}
+                                </span>
+                                {% if task.installation %}
+                                <small class="text-muted">
+                                    <i class="fas fa-building me-1"></i>
+                                    {{ task.installation.name }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="progress-ring me-2">
+                                <svg>
+                                    <circle class="bg" cx="20" cy="20" r="17"></circle>
+                                    <circle class="progress" cx="20" cy="20" r="17" 
+                                            stroke-dasharray="{{ task.get_progress_percentage }}, 100"></circle>
+                                </svg>
+                            </div>
+                            <small class="text-muted">{{ task.get_progress_percentage }}%</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-tasks fa-2x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Noch keine Aufgaben vorhanden.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Rechte Spalte -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h5 class="mb-3">
+                    <i class="fas fa-bolt me-2"></i>
+                    Schnellaktionen
+                </h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'protocols:task_create' %}" class="btn btn-light">
+                        <i class="fas fa-plus me-2"></i>Neue Aufgabe erstellen
+                    </a>
+                    <a href="{% url 'protocols:task_list' %}?overdue_only=on" class="btn btn-outline-light">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Überfällige Aufgaben
+                    </a>
+                    <a href="{% url 'protocols:task_list' %}?status=todo" class="btn btn-outline-light">
+                        <i class="fas fa-clock me-2"></i>Offene Aufgaben
+                    </a>
+                    <a href="{% url 'protocols:task_list' %}?status=in_progress" class="btn btn-outline-light">
+                        <i class="fas fa-spinner me-2"></i>Aktive Aufgaben
+                    </a>
+                </div>
+            </div>
+
+            <!-- Überfällige Aufgaben -->
+            {% if overdue_tasks %}
+            <div class="task-list-card">
+                <h5 class="mb-3 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Überfällige Aufgaben
+                </h5>
+                
+                {% for task in overdue_tasks %}
+                <div class="task-item overdue">
+                    <h6 class="mb-1">
+                        <a href="{% url 'protocols:task_detail' task.pk %}" class="text-decoration-none">
+                            {{ task.title }}
+                        </a>
+                    </h6>
+                    <p class="mb-2 text-muted small">
+                        {{ task.description|truncatewords:10 }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-danger">
+                            <i class="fas fa-calendar me-1"></i>
+                            Fällig: {{ task.due_date|date:"d.m.Y" }}
+                        </small>
+                        <span class="badge bg-danger">Überfällig</span>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'protocols:task_list' %}?overdue_only=on" class="btn btn-outline-danger btn-sm">
+                        Alle überfälligen Aufgaben anzeigen
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Prioritäts-Verteilung -->
+            {% if priority_stats %}
+            <div class="chart-container">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-bar text-primary me-2"></i>
+                    Aufgaben nach Priorität
+                </h5>
+                <canvas id="priorityChart" width="300" height="200"></canvas>
+            </div>
+            {% endif %}
+
+            <!-- System-Info -->
+            <div class="task-list-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle text-primary me-2"></i>
+                    System-Informationen
+                </h5>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-primary mb-1">{{ stats.total }}</h4>
+                            <small class="text-muted">Aufgaben gesamt</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-success mb-1">
+                                {% if stats.total > 0 %}
+                                    {{ stats.completed|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Fertigstellung</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3">
+                            <h4 class="text-warning mb-1">{{ stats.in_progress }}</h4>
+                            <small class="text-muted">In Bearbeitung</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded p-3">
+                            <h4 class="text-danger mb-1">{{ stats.overdue }}</h4>
+                            <small class="text-muted">Überfällig</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status-Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Zu erledigen', 'In Bearbeitung', 'Abgeschlossen', 'Überfällig'],
+            datasets: [{
+                data: [
+                    {{ stats.todo }},
+                    {{ stats.in_progress }},
+                    {{ stats.completed }},
+                    {{ stats.overdue }}
+                ],
+                backgroundColor: [
+                    '#6c757d',
+                    '#0d6efd',
+                    '#198754',
+                    '#dc3545'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Prioritäts-Chart
+    {% if priority_stats %}
+    const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+    const priorityChart = new Chart(priorityCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for stat in priority_stats %}
+                    '{{ stat.priority|title }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Anzahl Aufgaben',
+                data: [
+                    {% for stat in priority_stats %}
+                        {{ stat.count }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#28a745',
+                    '#ffc107',
+                    '#fd7e14',
+                    '#dc3545'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+
+    // Auto-Refresh alle 5 Minuten
+    setInterval(function() {
+        location.reload();
+    }, 300000);
+});
+</script>
+{% endblock %} 

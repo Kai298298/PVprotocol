@@ -1,0 +1,45 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Mitarbeiter einladen{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Mitarbeiter einladen
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Wie funktioniert das?</strong><br>
+                        Geben Sie die E-Mail-Adresse und Rolle des neuen Mitarbeiters ein. 
+                        Eine Einladung mit Link wird automatisch per E-Mail versendet.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Zurück
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>
+                                Einladung senden
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

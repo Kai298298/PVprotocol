@@ -1,0 +1,238 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Protokoll bearbeiten{% else %}Neues Protokoll{% endif %} – {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                {% if object %}Protokoll bearbeiten{% else %}Neues Protokoll{% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+                {% if object %}
+                    Bearbeiten Sie die Protokoll-Details
+                {% else %}
+                    Erstellen Sie ein neues Protokoll
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% url 'protocols:protocol_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Zurück zur Liste
+        </a>
+    </div>
+
+    <!-- Formular -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Protokoll-Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Titel -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">
+                                <i class="fas fa-heading me-1"></i>Titel
+                            </label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.title.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Anlage -->
+                        <div class="mb-3">
+                            <label for="{{ form.installation.id_for_label }}" class="form-label">
+                                <i class="fas fa-solar-panel me-1"></i>PV-Anlage
+                            </label>
+                            {{ form.installation }}
+                            {% if form.installation.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.installation.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Vorlage -->
+                        <div class="mb-3">
+                            <label for="{{ form.template.id_for_label }}" class="form-label">
+                                <i class="fas fa-file-code me-1"></i>Protokollvorlage
+                            </label>
+                            {{ form.template }}
+                            {% if form.template.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.template.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Inhalt -->
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Inhalt
+                            </label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.content.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Verwenden Sie Markdown für die Formatierung.
+                            </div>
+                        </div>
+
+                        <!-- Status (nur beim Bearbeiten) -->
+                        {% if object %}
+                        <div class="mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">
+                                <i class="fas fa-tasks me-1"></i>Status
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.status.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'protocols:protocol_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Abbrechen
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if object %}Aktualisieren{% else %}Erstellen{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Hilfe -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Hilfe
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Titel</h6>
+                        <p class="small text-muted mb-0">
+                            Geben Sie einen aussagekräftigen Titel für das Protokoll ein.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Anlage</h6>
+                        <p class="small text-muted mb-0">
+                            Wählen Sie die zugehörige PV-Anlage aus.
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Vorlage</h6>
+                        <p class="small text-muted mb-0">
+                            Wählen Sie eine passende Protokollvorlage aus.
+                        </p>
+                    </div>
+                    <div>
+                        <h6 class="text-primary">Inhalt</h6>
+                        <p class="small text-muted mb-0">
+                            Verwenden Sie Markdown für die Formatierung des Protokollinhalts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Markdown-Hilfe -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-markdown me-2"></i>Markdown-Syntax
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="small">
+                        <p><strong>Überschriften:</strong> <code># H1</code>, <code>## H2</code></p>
+                        <p><strong>Fett:</strong> <code>**Text**</code></p>
+                        <p><strong>Kursiv:</strong> <code>*Text*</code></p>
+                        <p><strong>Liste:</strong> <code>- Punkt</code></p>
+                        <p><strong>Link:</strong> <code>[Text](URL)</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Formular-Styling */
+    .form-control, .form-select {
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Textarea für Markdown */
+    textarea {
+        min-height: 200px;
+        font-family: 'Courier New', monospace;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Formular-Validierung
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const title = document.getElementById('{{ form.title.id_for_label }}');
+            if (!title.value.trim()) {
+                e.preventDefault();
+                title.classList.add('is-invalid');
+                return false;
+            }
+        });
+    }
+    
+    // Live-Validierung
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,157 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Vorlage löschen – {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-trash text-danger me-2"></i>
+                Vorlage löschen
+            </h1>
+            <p class="text-muted mb-0">Bestätigen Sie das Löschen der Vorlage</p>
+        </div>
+        <a href="{% url 'protocols:template_detail' template.pk %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Zurück
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger bg-opacity-10 border-0">
+                    <h5 class="mb-0 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Löschbestätigung erforderlich
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Achtung!
+                        </h6>
+                        <p class="mb-0">
+                            Sie sind dabei, die Vorlage <strong>"{{ template.name }}"</strong> unwiderruflich zu löschen.
+                        </p>
+                    </div>
+
+                    <!-- Vorlagen-Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Vorlagen-Details</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Name:</strong> {{ template.name }}</li>
+                                <li><strong>Typ:</strong> {{ template.template_type|default:"Standard" }}</li>
+                                <li><strong>Erstellt:</strong> {{ template.created_at|date:"d.m.Y H:i" }}</li>
+                                {% if template.description %}
+                                    <li><strong>Beschreibung:</strong> {{ template.description|truncatechars:50 }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-danger">Was wird gelöscht?</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-danger me-2"></i>Vorlagen-Inhalt</li>
+                                <li><i class="fas fa-check text-danger me-2"></i>Vorlagen-Konfiguration</li>
+                                <li><i class="fas fa-check text-danger me-2"></i>Logo (falls vorhanden)</li>
+                                <li><i class="fas fa-check text-danger me-2"></i>Vorlagen-Historie</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Warnung -->
+                    <div class="alert alert-danger" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1">Unwiderruflich löschen</h6>
+                                <p class="mb-0">
+                                    Diese Aktion kann nicht rückgängig gemacht werden. 
+                                    Alle Daten werden permanent gelöscht.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Abhängigkeiten prüfen -->
+                    {% if template.protocol_set.all %}
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Abhängigkeiten gefunden
+                        </h6>
+                        <p class="mb-0">
+                            Diese Vorlage wird von {{ template.protocol_set.count }} Protokoll(en) verwendet. 
+                            Das Löschen der Vorlage kann diese Protokolle beeinträchtigen.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Formular -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'protocols:template_detail' template.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Abbrechen
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Endgültig löschen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Hilfe -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Hilfe
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Alternativen zum Löschen</h6>
+                            <ul class="small">
+                                <li>Vorlage als inaktiv markieren</li>
+                                <li>Vorlage archivieren</li>
+                                <li>Vorlage duplizieren</li>
+                                <li>Vorlage exportieren</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Nach dem Löschen</h6>
+                            <ul class="small">
+                                <li>Vorlage ist nicht wiederherstellbar</li>
+                                <li>Alle Daten gehen verloren</li>
+                                <li>Protokolle können beeinträchtigt werden</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .alert {
+        border-radius: 0.5rem;
+    }
+    
+    .card {
+        border-radius: 0.75rem;
+    }
+    
+    .btn {
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %} 
